@@ -51,7 +51,8 @@
                     <span class="text-xs bg-blue-700 px-2.5 py-0.5 rounded-full border border-blue-400 font-bold">👤 <span id="current-user-display"></span></span>
                     <span id="current-role-badge" class="text-[10px] text-amber-300 font-semibold mt-0.5"></span>
                 </div>
-                <button id="btn-admin-panel" onclick="openAdminModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-semibold px-2.5 py-1.5 rounded-lg shadow transition">⚙️ Admin</button>
+                <!-- Nút Admin chỉ hiển thị với Chủ xe -->
+                <button id="btn-admin-panel" onclick="openAdminModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-semibold px-2.5 py-1.5 rounded-lg shadow transition hidden">⚙️ Admin</button>
                 <button onclick="handleLogout()" class="text-xs bg-red-500 hover:bg-red-600 text-white font-semibold px-2.5 py-1.5 rounded-lg shadow transition">Thoát</button>
             </div>
         </header>
@@ -243,7 +244,7 @@
                     </div>
                 </div>
 
-                <!-- CẤU HÌNH GIÁ TIỀN & ĐỔI TÊN XE (ĐÃ ĐƯỢC CHUYỂN XUỐNG DƯỚI CÙNG VÀ ẨN VỚI NHÂN VIÊN) -->
+                <!-- CẤU HÌNH GIÁ TIỀN & ĐỔI TÊN XE -->
                 <div class="bg-white p-4 rounded-xl shadow-md border-t-4 border-blue-500 space-y-4">
                     <h3 class="font-bold text-blue-800 text-base flex items-center justify-between border-b pb-2">
                         <span>⚙️ Cấu Hình Giá & Đổi Tên Xe</span>
@@ -327,7 +328,7 @@
         </div>
     </div>
 
-    <!-- 4. MODAL GIAO DIỆN ADMIN QUẢN LÝ TÀI KHOẢN -->
+    <!-- 4. MODAL GIAO DIỆN ADMIN QUẢN LÝ TÀI KHOẢN & MẬT KHẨU BÁO CÁO -->
     <div id="admin-modal" class="fixed inset-0 bg-black/60 hidden z-[60] flex items-center justify-center p-4">
         <div class="bg-white rounded-xl p-5 w-full max-w-md space-y-4 max-h-[90vh] flex flex-col shadow-2xl">
             <div class="flex justify-between items-center border-b pb-3">
@@ -338,7 +339,26 @@
             </div>
 
             <div class="overflow-y-auto space-y-5 pr-1 flex-1">
-                <!-- FORM TẠO / ĐỔI MẬT KHẨU & PHÂN QUYỀN -->
+                
+                <!-- CẤU HÌNH MẬT KHẨU MỞ KHÓA & RESET -->
+                <div class="bg-red-50/60 p-3.5 rounded-lg border border-red-200 space-y-2">
+                    <h4 class="text-xs font-bold text-red-800 uppercase tracking-wide">🔑 Cấu Hình Mật Khẩu Báo Cáo & Reset</h4>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 mb-0.5">Mật khẩu Mở/Ẩn (Doanh Thu & Lịch Sử):</label>
+                            <input type="password" id="admin-view-pass" class="w-full p-2 border rounded text-xs bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 mb-0.5">Mật khẩu Reset & Xóa Dữ Liệu:</label>
+                            <input type="password" id="admin-reset-pass" class="w-full p-2 border rounded text-xs bg-white">
+                        </div>
+                        <button onclick="saveSystemPasswords()" class="w-full bg-red-600 text-white text-xs font-bold py-2 rounded hover:bg-red-700 shadow transition">
+                            🔒 Lưu Mật Khẩu Hệ Thống
+                        </button>
+                    </div>
+                </div>
+
+                <!-- FORM TẠO / ĐỔI MẬT KHẨU & PHÂN QUYỀN TÀI KHOẢN -->
                 <div class="bg-amber-50/60 p-3.5 rounded-lg border border-amber-200 space-y-3">
                     <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wide">👤 Quản Lý Tài Khoản & Phân Quyền</h4>
                     <div class="space-y-2">
@@ -376,9 +396,10 @@
 
     <script>
         const TOTAL_BIKES = 100;
-        const ADMIN_ACCESS_PASS = "123456@@@"; // Mật khẩu truy cập Admin
-        const VIEW_PASSWORD = "123456@@";       // Mật khẩu mở báo cáo nhanh
-        const RESET_PASSWORD = "123456@@@";    // Mật khẩu reset doanh thu
+        
+        // Cấu hình Mật khẩu có thể tùy chỉnh và lưu vào LocalStorage
+        let VIEW_PASSWORD = localStorage.getItem('app_view_pass') || "123456@@";       // Mật khẩu xem/mở khóa
+        let RESET_PASSWORD = localStorage.getItem('app_reset_pass') || "123456@@@";    // Mật khẩu reset/xóa dữ liệu
 
         // Quản lý Danh sách Tài khoản ID, Tên & Phân Quyền
         let users = JSON.parse(localStorage.getItem('app_users_v3') || '{}');
@@ -411,12 +432,12 @@
         document.getElementById('daily-date-picker').value = todayStr;
         document.getElementById('monthly-picker').value = thisMonthStr;
 
-        // Định dạng mã xe dạng 4 chữ số (ví dụ: 0001, 0050, 0100)
+        // Định dạng mã xe dạng 4 chữ số
         function formatBikeId(num) {
             return String(num).padStart(4, '0');
         }
 
-        // Lấy tên hiển thị đầy đủ của xe (Mã xe + Tên tùy chỉnh nếu có)
+        // Lấy tên hiển thị đầy đủ của xe
         function getBikeDisplayName(bikeId) {
             if (!bikeId) return '';
             let customName = bikeCustomNames[bikeId];
@@ -475,7 +496,6 @@
 
             localStorage.setItem('app_bike_names', JSON.stringify(bikeCustomNames));
             
-            // Cập nhật lại toàn bộ giao diện
             initBikeOptions();
             if (selectedBikeId) {
                 document.getElementById('select-bike').value = selectedBikeId;
@@ -503,12 +523,15 @@
                 const role = userInfo.role || 'STAFF';
                 const ownerSections = document.getElementById('owner-only-sections');
                 const roleBadge = document.getElementById('current-role-badge');
+                const btnAdmin = document.getElementById('btn-admin-panel');
 
                 if (role === 'OWNER') {
                     ownerSections.classList.remove('hidden');
+                    btnAdmin.classList.remove('hidden'); // Hiển thị nút Admin cho Chủ xe
                     roleBadge.textContent = 'Quyền: Chủ xe';
                 } else {
                     ownerSections.classList.add('hidden');
+                    btnAdmin.classList.add('hidden'); // Ẩn nút Admin hoàn toàn với Nhân viên
                     roleBadge.textContent = 'Quyền: Nhân viên';
                 }
                 renderActiveRentals();
@@ -557,15 +580,18 @@
             }
         }
 
-        // GIAO DIỆN ADMIN QUẢN LÝ TÀI KHOẢN
+        // GIAO DIỆN ADMIN QUẢN LÝ TÀI KHOẢN & MẬT KHẨU
         function openAdminModal() {
-            let pass = prompt("Nhập mật khẩu Admin để truy cập:");
-            if (pass === ADMIN_ACCESS_PASS) {
-                renderAdminUserList();
-                document.getElementById('admin-modal').classList.remove('hidden');
-            } else if (pass !== null) {
-                alert("Mật khẩu Admin không chính xác!");
+            // Kiểm tra phân quyền trực tiếp
+            if (!currentUser || !users[currentUser] || users[currentUser].role !== 'OWNER') {
+                alert("Bạn không có quyền truy cập khu vực Admin!");
+                return;
             }
+
+            document.getElementById('admin-view-pass').value = VIEW_PASSWORD;
+            document.getElementById('admin-reset-pass').value = RESET_PASSWORD;
+            renderAdminUserList();
+            document.getElementById('admin-modal').classList.remove('hidden');
         }
 
         function closeAdminModal() {
@@ -573,6 +599,25 @@
             document.getElementById('admin-input-id').value = '';
             document.getElementById('admin-input-name').value = '';
             document.getElementById('admin-input-pass').value = '';
+        }
+
+        // ĐỔI MẬT KHẨU BÁO CÁO VÀ RESET TRỰC TIẾP
+        function saveSystemPasswords() {
+            const newViewPass = document.getElementById('admin-view-pass').value.trim();
+            const newResetPass = document.getElementById('admin-reset-pass').value.trim();
+
+            if (!newViewPass || !newResetPass) {
+                alert("Mật khẩu không được để trống!");
+                return;
+            }
+
+            VIEW_PASSWORD = newViewPass;
+            RESET_PASSWORD = newResetPass;
+
+            localStorage.setItem('app_view_pass', VIEW_PASSWORD);
+            localStorage.setItem('app_reset_pass', RESET_PASSWORD);
+
+            alert("Đã cập nhật Mật khẩu Báo cáo & Reset thành công!");
         }
 
         function renderAdminUserList() {
@@ -700,7 +745,6 @@
             if (bikePrices[cat]) {
                 return bikePrices[cat];
             }
-            // Mặc định nếu chưa cấu hình
             return cat === 'SMALL' ? { unit: 'MINUTE', amount: 200 } : { unit: 'MINUTE', amount: 300 };
         }
 
@@ -884,7 +928,6 @@
             }
         }
 
-        // XÓA LƯỢT THUÊ ĐANG HOẠT ĐỘNG (KHÔNG TÍNH TIỀN)
         function cancelActiveRental(bikeId) {
             let displayName = getBikeDisplayName(bikeId);
             if (confirm(`Bạn chắc chắn muốn XÓA / HỦY lượt thuê của ${displayName}?
@@ -901,7 +944,6 @@ Lưu ý: Lượt thuê này sẽ bị hủy bỏ hoàn toàn và KHÔNG ghi nh�
             }
         }
 
-        // ĐỔI XE GIỮ NGUYÊN THỜI GIAN THUÊ
         function openChangeBikeModal() {
             if (!selectedBikeId || !rentals[selectedBikeId]) return;
             
@@ -944,7 +986,6 @@ Lưu ý: Lượt thuê này sẽ bị hủy bỏ hoàn toàn và KHÔNG ghi nh�
             alert(`Đã chuyển lượt thuê sang ${getBikeDisplayName(newBikeId)} thành công!`);
         }
 
-        // DANH SÁCH XE ĐANG HOẠT ĐỘNG
         function renderActiveRentals() {
             const listElem = document.getElementById('active-rentals-list');
             const countElem = document.getElementById('active-count');
@@ -957,7 +998,6 @@ Lưu ý: Lượt thuê này sẽ bị hủy bỏ hoàn toàn và KHÔNG ghi nh�
                 return;
             }
 
-            // Kiểm tra xem người dùng hiện tại có phải là Chủ xe hay không
             const isOwner = currentUser && users[currentUser] && users[currentUser].role === 'OWNER';
 
             let html = '';
@@ -967,7 +1007,6 @@ Lưu ý: Lượt thuê này sẽ bị hủy bỏ hoàn toàn và KHÔNG ghi nh�
                 let mins = Math.max(1, Math.ceil((new Date() - startTime) / (1000 * 60)));
                 let displayName = getBikeDisplayName(bikeId);
 
-                // Nút Xóa chỉ hiển thị đối với Chủ xe (isOwner = true)
                 let deleteBtnHtml = isOwner 
                     ? `<button onclick="cancelActiveRental('${bikeId}')" class="text-xs bg-red-500 text-white font-semibold px-2.5 py-1.5 rounded-lg shadow hover:bg-red-600" title="Hủy lượt thuê">
                             Xóa
@@ -998,10 +1037,10 @@ Lưu ý: Lượt thuê này sẽ bị hủy bỏ hoàn toàn và KHÔNG ghi nh�
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // KHÓA / MỞ KHÓA BÁO CÁO & LỊCH SỬ
+        // KHÓA / MỞ KHÓA BÁO CÁO & LỊCH SỬ DÙNG BIẾN ĐỘNG VIEW_PASSWORD & RESET_PASSWORD
         function unlockDailyReport() {
             let pass = prompt("Nhập mật khẩu để xem Doanh thu ngày:");
-            if (pass === VIEW_PASSWORD || pass === ADMIN_ACCESS_PASS) {
+            if (pass === VIEW_PASSWORD) {
                 isDailyUnlocked = true;
                 document.getElementById('daily-locked-box').classList.add('hidden');
                 document.getElementById('daily-content-box').classList.remove('hidden');
@@ -1051,7 +1090,7 @@ Lưu ý: Lượt thuê này sẽ bị hủy bỏ hoàn toàn và KHÔNG ghi nh�
 
         function unlockMonthlyReport() {
             let pass = prompt("Nhập mật khẩu để xem Doanh thu tháng:");
-            if (pass === VIEW_PASSWORD || pass === ADMIN_ACCESS_PASS) {
+            if (pass === VIEW_PASSWORD) {
                 isMonthlyUnlocked = true;
                 document.getElementById('monthly-locked-box').classList.add('hidden');
                 document.getElementById('monthly-content-box').classList.remove('hidden');
@@ -1124,7 +1163,7 @@ Lưu ý: Lượt thuê này sẽ bị hủy bỏ hoàn toàn và KHÔNG ghi nh�
                 return;
             }
             let pass = prompt("Nhập mật khẩu để xem Lịch sử thuê:");
-            if (pass === VIEW_PASSWORD || pass === ADMIN_ACCESS_PASS) {
+            if (pass === VIEW_PASSWORD) {
                 isHistoryUnlocked = true;
                 document.getElementById('history-locked-box').classList.add('hidden');
                 document.getElementById('history-content-box').classList.remove('hidden');
@@ -1196,7 +1235,7 @@ Lưu ý: Lượt thuê này sẽ bị hủy bỏ hoàn toàn và KHÔNG ghi nh�
                 return;
             }
             let pass = prompt("Nhập mật khẩu để xem Lịch sử Đăng nhập:");
-            if (pass === VIEW_PASSWORD || pass === ADMIN_ACCESS_PASS) {
+            if (pass === VIEW_PASSWORD) {
                 isLoginHistoryUnlocked = true;
                 document.getElementById('login-history-locked-box').classList.add('hidden');
                 document.getElementById('login-history-content-box').classList.remove('hidden');

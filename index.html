@@ -1,257 +1,1256 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hệ Thống Quản Lý Cho Thuê Xe</title>
-  <style>
-    :root {
-      --primary: #2563eb;
-      --danger: #dc2626;
-      --success: #16a34a;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --border: #e2e8f0;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      margin: 0;
-      padding: 20px;
-      color: #334155;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .card {
-      background: var(--card-bg);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      border: 1px solid var(--border);
-    }
-
-    .role-selector {
-      background: #e0f2fe;
-      border-color: #7dd3fc;
-    }
-
-    .grid-buttons {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin-top: 15px;
-    }
-
-    button {
-      padding: 12px 16px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s, opacity 0.2s;
-    }
-
-    button:hover { opacity: 0.9; }
-
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-success { background: var(--success); color: white; }
-    .btn-danger { background: var(--danger); color: white; }
-
-    .vehicle-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-bottom: 10px;
-    }
-
-    .badge {
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-weight: bold;
-    }
-    .badge-rented { background: #fef3c7; color: #d97706; }
-    .badge-available { background: #dcfce7; color: #15803d; }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      margin-bottom: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      box-sizing: border-box;
-    }
-
-    .hidden { display: none !important; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Xe Điện Thông Linh</title>
+    <!-- Tailwind CSS & Thư viện Quét QR Video Realtime -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
-<body>
+<body class="bg-slate-100 min-h-screen text-slate-800 pb-10">
 
-<div class="container">
+    <!-- 1. MÀN HÌNH ĐĂNG NHẬP HỆ THỐNG -->
+    <div id="login-screen" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm space-y-5 border border-slate-100">
+            <div class="text-center space-y-1">
+                <div class="text-4xl mb-2">⚡</div>
+                <h2 class="text-xl font-bold text-slate-800">Đăng Nhập Hệ Thống</h2>
+                <p class="text-xs text-slate-500">Quản Lý Xe Điện Thông Linh</p>
+            </div>
 
-  <!-- Giả lập Chuyển đổi Vai trò Đăng nhập -->
-  <div class="card role-selector">
-    <label for="userRole"><strong>Đang đăng nhập với vai trò:</strong></label>
-    <select id="userRole" onchange="switchRole(this.value)">
-      <option value="owner">Chủ xe (Owner) - Toàn quyền hệ thống</option>
-      <option value="admin">Quản trị viên (Admin) - Toàn quyền trừ xóa xe đang thuê</option>
-      <option value="staff">Nhân viên (Staff) - Giới hạn 4 chức năng vận hành</option>
-    </select>
-  </div>
-
-  <!-- Yêu cầu 4: Giao diện thao tác dành cho Nhân viên (Owner & Admin cũng thấy) -->
-  <div class="card">
-    <h2>Thao Tác Vận Hành</h2>
-    <div class="grid-buttons">
-      <button class="btn-primary" onclick="actionSelectVehicle()">1. Chọn xe cho thuê</button>
-      <button class="btn-primary" onclick="actionScanQR()">2. Quét mã QR</button>
-      <button class="btn-primary" onclick="actionChangeVehicle()">3. Đổi xe</button>
-      <button class="btn-success" onclick="actionEndRental()">4. Kết thúc thuê xe</button>
+            <form onsubmit="handleUserLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Mã ID / Tài khoản</label>
+                    <input type="text" id="login-id" required placeholder="Nhập ID (Ví dụ: 123456)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu</label>
+                    <input type="password" id="login-pass" required placeholder="Nhập mật khẩu" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-500/30 transition">
+                    ĐĂNG NHẬP
+                </button>
+            </form>
+            <p id="login-error-msg" class="text-xs text-red-500 text-center font-semibold hidden"></p>
+        </div>
     </div>
-  </div>
 
-  <!-- Yêu cầu 2: Danh sách xe & Kiểm tra quyền Xóa xe -->
-  <div class="card">
-    <h2>Danh Sách Xe</h2>
-    <div id="vehicleList"></div>
-  </div>
+    <!-- 2. GIAO DIỆN CHÍNH -->
+    <div id="main-app" class="hidden">
+        
+        <!-- Header -->
+        <header class="bg-blue-600 text-white p-4 shadow-lg sticky top-0 z-50 flex justify-between items-center">
+            <div class="font-bold text-lg flex items-center gap-1.5">
+                <span>⚡</span>
+                <span class="hidden sm:inline">Quản Lý Xe Điện Thông Linh</span>
+                <span class="sm:hidden">Thông Linh</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="flex flex-col text-right">
+                    <span class="text-xs bg-blue-700 px-2.5 py-0.5 rounded-full border border-blue-400 font-bold">👤 <span id="current-user-display"></span></span>
+                    <span id="current-role-badge" class="text-[10px] text-amber-300 font-semibold mt-0.5"></span>
+                </div>
+                <button id="btn-admin-panel" onclick="openAdminModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-semibold px-2.5 py-1.5 rounded-lg shadow transition">⚙️ Admin</button>
+                <button onclick="handleLogout()" class="text-xs bg-red-500 hover:bg-red-600 text-white font-semibold px-2.5 py-1.5 rounded-lg shadow transition">Thoát</button>
+            </div>
+        </header>
 
-  <!-- Yêu cầu 1 & 3: CẤU HÌNH GIÁ & ĐỔI TÊN XE (ĐẶT Ở CÙNG BÊN DƯỚI DƯỚI CÙNG GIAO DIỆN) -->
-  <div id="adminSettingsSection" class="card">
-    <h2>Cấu Hình Hệ Thống</h2>
-    
-    <label for="renameInput">Đổi tên xe:</label>
-    <input type="text" id="renameInput" placeholder="Nhập tên mới cho xe...">
-    <button class="btn-primary" onclick="saveVehicleName()">Lưu Tên Xe</button>
-    
-    <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border);">
+        <div class="max-w-md mx-auto p-4 space-y-6">
 
-    <label for="priceInput">Cấu hình giá thuê (VNĐ/giờ):</label>
-    <input type="number" id="priceInput" placeholder="Nhập giá thuê mới...">
-    <button class="btn-primary" onclick="savePriceConfig()">Lưu Cấu Hình Giá</button>
-  </div>
+            <!-- Nút bật Quét QR -->
+            <div class="bg-white p-4 rounded-xl shadow-md text-center">
+                <button id="btn-toggle-qr" onclick="toggleQrScanner()" class="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-300 font-bold py-3 px-4 rounded-lg shadow-sm flex items-center justify-center gap-2">
+                    📷 Bấm vào để quét mã QR
+                </button>
 
-</div>
+                <!-- Khung Quét Camera QR Realtime -->
+                <div id="qr-container" class="hidden mt-4 space-y-2 border-t pt-3">
+                    <div id="reader" class="overflow-hidden rounded-lg border-2 border-blue-400 bg-black min-h-[250px]"></div>
+                    <p class="text-xs text-gray-500">Đưa camera lại gần mã QR dán trên xe (quét tự động)</p>
+                    <button onclick="stopQrScanner()" class="text-xs text-red-500 hover:underline font-semibold">Tắt camera</button>
+                </div>
+            </div>
 
-<script>
-  // Trạng thái vai trò hiện tại (Mặc định: Chủ xe)
-  let currentUserRole = 'owner';
+            <!-- Nhập/Chọn mã xe thủ công -->
+            <div class="bg-white p-4 rounded-xl shadow-md space-y-3">
+                <label class="block text-sm font-medium text-gray-700">Hoặc chọn xe thủ công (0001 - 0100):</label>
+                <div class="flex gap-2">
+                    <select id="select-bike" onchange="checkBikeStatus()" class="w-full p-2.5 border rounded-lg bg-gray-50 font-medium focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- Chọn xe --</option>
+                    </select>
+                </div>
+            </div>
 
-  // Dữ liệu xe mẫu
-  let vehicles = [
-    { id: 1, name: "Xe Đẩy Điện A1", status: "rented", price: 50000 },
-    { id: 2, name: "Xe Nâng Điện B2", status: "available", price: 80000 }
-  ];
+            <!-- Thẻ trạng thái & Tác vụ Quản lý Xe -->
+            <div id="action-card" class="bg-white p-5 rounded-xl shadow-lg hidden border-l-4">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <span id="card-bike-id" class="text-lg font-bold block"></span>
+                        <span id="card-bike-custom-name" class="text-xs text-blue-600 font-semibold italic"></span>
+                    </div>
+                    <span id="card-status-badge" class="px-3 py-1 rounded-full text-xs font-bold"></span>
+                </div>
 
-  window.onload = function() {
-    renderUI();
-  };
+                <div id="card-details" class="text-sm space-y-2 mb-3 text-gray-700"></div>
 
-  // Thay đổi vai trò người dùng
-  function switchRole(role) {
-    currentUserRole = role;
-    renderUI();
-  }
+                <!-- Nút Bấm Tác Vụ -->
+                <div class="space-y-2">
+                    <button id="btn-start" onclick="startRental()" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 shadow hidden">
+                        ▶ BẮT ĐẦU THUÊ XE
+                    </button>
+                    <button id="btn-stop" onclick="stopRental()" class="w-full bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 shadow hidden">
+                        ⏹ KẾT THÚC THUÊ & TÍNH TIỀN
+                    </button>
+                    <button id="btn-change" onclick="openChangeBikeModal()" class="w-full bg-amber-500 text-white py-2 rounded-lg font-semibold hover:bg-amber-600 shadow hidden text-sm">
+                        🔄 ĐỔI SANG XE KHÁC (Giữ nguyên thời gian)
+                    </button>
+                </div>
+            </div>
 
-  // Render lại toàn bộ UI theo phân quyền
-  function renderUI() {
-    // Yêu cầu 3: Chủ xe (Owner) nhìn thấy tất cả giao diện tương tự Admin
-    const isOwnerOrAdmin = (currentUserRole === 'owner' || currentUserRole === 'admin');
-    const settingsSection = document.getElementById('adminSettingsSection');
+            <!-- CẤU HÌNH GIÁ TIỀN & ĐỔI TÊN XE (MỚI ĐƯỢC ĐƯA RA NGOÀI GIAO DIỆN CHÍNH) -->
+            <div class="bg-white p-4 rounded-xl shadow-md border-t-4 border-blue-500 space-y-4">
+                <h3 class="font-bold text-blue-800 text-base flex items-center justify-between border-b pb-2">
+                    <span>⚙️ Cấu Hình Giá & Đổi Tên Xe</span>
+                </h3>
 
-    // Nhân viên không nhìn thấy phần Cấu hình giá & Đổi tên xe
-    if (isOwnerOrAdmin) {
-      settingsSection.classList.remove('hidden');
-    } else {
-      settingsSection.classList.add('hidden');
-    }
+                <!-- 1. ĐỔI TÊN XE -->
+                <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100 space-y-2 text-xs">
+                    <h4 class="font-bold text-blue-900 uppercase">🏷️ Đổi Tên Xe</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold text-gray-600 mb-1">Mã xe:</label>
+                            <select id="rename-bike-select" onchange="onRenameBikeSelectChange()" class="w-full p-2 border rounded bg-white font-medium">
+                                <option value="">-- Chọn xe --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-gray-600 mb-1">Tên mới hiển thị:</label>
+                            <input type="text" id="rename-bike-input" placeholder="Ví dụ: Xe Đỏ - 0001" class="w-full p-2 border rounded bg-white">
+                        </div>
+                    </div>
+                    <button onclick="saveBikeName()" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 shadow transition">
+                        💾 Lưu Tên Xe Mới
+                    </button>
+                </div>
 
-    renderVehicleList();
-  }
+                <!-- 2. TÍNH GIÁ TIỀN -->
+                <div class="bg-amber-50/60 p-3 rounded-lg border border-amber-100 space-y-2 text-xs">
+                    <h4 class="font-bold text-amber-900 uppercase">💵 Cấu Hình Giá Thuê Xe</h4>
+                    <div>
+                        <label class="block font-semibold text-gray-600 mb-1">Phân Loại Xe:</label>
+                        <select id="price-category-select" onchange="onCategoryChange()" class="w-full p-2 border rounded bg-white font-medium">
+                            <option value="SMALL">Xe Nhỏ (Mã Xe 0001 -> 0050)</option>
+                            <option value="LARGE">Xe To (Mã Xe 0051 -> 0100)</option>
+                        </select>
+                    </div>
 
-  function renderVehicleList() {
-    const listContainer = document.getElementById('vehicleList');
-    listContainer.innerHTML = '';
+                    <div>
+                        <label class="block font-semibold text-gray-600 mb-1">Áp dụng cho Mã Xe:</label>
+                        <select id="price-bike-select" class="w-full p-2 border rounded bg-white font-medium">
+                            <option value="ALL">-- Áp dụng toàn bộ loại xe này --</option>
+                        </select>
+                    </div>
 
-    vehicles.forEach(vehicle => {
-      const isRented = vehicle.status === 'rented';
-      const statusBadge = isRented 
-        ? `<span class="badge badge-rented">Đang cho thuê</span>` 
-        : `<span class="badge badge-available">Sẵn sàng</span>`;
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold text-gray-600 mb-1">Cách tính tiền:</label>
+                            <select id="price-unit-select" class="w-full p-2 border rounded bg-white font-medium">
+                                <option value="MINUTE">Tính theo phút (VNĐ/Phút)</option>
+                                <option value="HOUR">Tính theo giờ (VNĐ/Giờ)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-gray-600 mb-1">Giá tiền (VNĐ):</label>
+                            <input type="number" id="price-amount-input" placeholder="Ví dụ: 200 hoặc 50000" class="w-full p-2 border rounded bg-white">
+                        </div>
+                    </div>
 
-      const item = document.createElement('div');
-      item.className = 'vehicle-item';
-      item.innerHTML = `
-        <div>
-          <strong>${vehicle.name}</strong> - ${vehicle.price.toLocaleString()} VNĐ/h
-          <br>${statusBadge}
+                    <button onclick="saveBikePriceConfig()" class="w-full bg-amber-600 text-white font-bold py-2 rounded hover:bg-amber-700 shadow transition">
+                        💾 Cập Nhật Bảng Giá
+                    </button>
+                </div>
+            </div>
+
+            <!-- Danh sách Xe Đang Hoạt Động -->
+            <div class="bg-white p-4 rounded-xl shadow-md">
+                <h3 class="font-bold border-b pb-2 mb-3 text-blue-800 flex justify-between items-center">
+                    <span>⚡ Xe đang được thuê</span>
+                    <span id="active-count" class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full">0 xe</span>
+                </h3>
+                <div id="active-rentals-list" class="space-y-2 text-sm">
+                    <p class="text-gray-400 italic text-center py-2">Hiện chưa có xe nào đang thuê.</p>
+                </div>
+            </div>
+
+            <!-- CHỈ HIỂN THỊ DÀNH CHO QUYỀN "CHỦ XE" -->
+            <div id="owner-only-sections" class="space-y-6">
+
+                <!-- BÁO CÁO 1: Bảng Thống Kê Doanh Thu Theo Ngày -->
+                <div class="bg-white p-4 rounded-xl shadow-md border-t-4 border-green-500 space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-green-700 text-base">📊 Doanh thu theo ngày</h3>
+                        <div class="flex items-center gap-1.5">
+                            <input type="date" id="daily-date-picker" onchange="renderDailyReport()" class="p-1 border rounded text-xs bg-gray-50">
+                            <button onclick="resetDailyData()" class="text-xs text-red-500 hover:text-red-700 font-semibold px-1.5 py-1 bg-red-50 rounded border border-red-200">🔄 Reset</button>
+                        </div>
+                    </div>
+
+                    <div id="daily-locked-box" class="p-4 bg-gray-50 rounded-lg text-center space-y-2 border border-dashed border-gray-300">
+                        <p class="text-xs text-gray-500 font-medium">🔒 Báo cáo ngày đang bị khóa</p>
+                        <button onclick="unlockDailyReport()" class="bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-green-700 shadow">
+                            🔓 Mở khóa xem
+                        </button>
+                    </div>
+
+                    <div id="daily-content-box" class="hidden space-y-3">
+                        <div class="flex justify-end">
+                            <button onclick="lockDailyReport()" class="text-xs text-gray-500 hover:text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded border">
+                                🔒 Ẩn doanh thu
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 text-center">
+                            <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+                                <span class="text-xs text-gray-500 block">TỔNG THU NHẬP</span>
+                                <span id="daily-total-money" class="text-lg font-bold text-green-700">0 VNĐ</span>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                <span class="text-xs text-gray-500 block">TỔNG LƯỢT THUÊ</span>
+                                <span id="daily-total-count" class="text-lg font-bold text-blue-700">0 lượt</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BÁO CÁO 2: Bảng Tổng Tiền Theo Tháng Của Từng Xe -->
+                <div class="bg-white p-4 rounded-xl shadow-md border-t-4 border-indigo-500 space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-indigo-700 text-base">📈 Doanh thu tháng theo xe</h3>
+                        <div class="flex items-center gap-1.5">
+                            <input type="month" id="monthly-picker" onchange="renderMonthlyReport()" class="p-1 border rounded text-xs bg-gray-50">
+                            <button onclick="resetMonthlyData()" class="text-xs text-red-500 hover:text-red-700 font-semibold px-1.5 py-1 bg-red-50 rounded border border-red-200">🔄 Reset</button>
+                        </div>
+                    </div>
+
+                    <div id="monthly-locked-box" class="p-4 bg-gray-50 rounded-lg text-center space-y-2 border border-dashed border-gray-300">
+                        <p class="text-xs text-gray-500 font-medium">🔒 Báo cáo tháng đang bị khóa</p>
+                        <button onclick="unlockMonthlyReport()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-700 shadow">
+                            🔓 Mở khóa xem
+                        </button>
+                    </div>
+
+                    <div id="monthly-content-box" class="hidden space-y-2">
+                        <div class="flex justify-end">
+                            <button onclick="lockMonthlyReport()" class="text-xs text-gray-500 hover:text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded border">
+                                🔒 Ẩn doanh thu
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 flex justify-between bg-indigo-50 p-2 rounded border border-indigo-100">
+                            <span>Tổng doanh thu tháng:</span>
+                            <b id="monthly-grand-total" class="text-indigo-600 font-bold">0 VNĐ</b>
+                        </div>
+                        <div id="monthly-bike-list" class="space-y-1.5 max-h-60 overflow-y-auto text-xs border-t pt-2"></div>
+                    </div>
+                </div>
+
+                <!-- Bảng Lịch Sử Cho Thuê -->
+                <div class="bg-white p-4 rounded-xl shadow-md space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <button onclick="unlockHistory()" class="font-bold text-gray-800 hover:text-blue-600 flex items-center gap-1.5 text-base">
+                            <span>📋 Lịch sử thuê xe</span>
+                            <span id="history-lock-status-badge" class="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border">(Bấm để xem)</span>
+                        </button>
+                        <div id="history-actions" class="hidden items-center gap-2">
+                            <button onclick="lockHistory()" class="text-xs text-gray-500 hover:text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded border">🔒 Ẩn</button>
+                            <button onclick="clearHistoryWithPassword()" class="text-xs text-red-500 hover:underline font-medium">Xóa hết</button>
+                        </div>
+                    </div>
+
+                    <div id="history-locked-box" class="p-4 bg-gray-50 rounded-lg text-center space-y-2 border border-dashed border-gray-300">
+                        <p class="text-xs text-gray-500 font-medium">🔒 Lịch sử thuê xe đang bị khóa</p>
+                        <button onclick="unlockHistory()" class="bg-gray-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-gray-800 shadow">
+                            🔓 Mở khóa xem lịch sử
+                        </button>
+                    </div>
+
+                    <div id="history-content-box" class="hidden">
+                        <div id="history-list" class="space-y-3 text-xs max-h-80 overflow-y-auto">
+                            <p class="text-gray-400 italic text-center py-2">Chưa có lịch sử giao dịch.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng Lịch Sử Đăng Nhập Hệ Thống -->
+                <div class="bg-white p-4 rounded-xl shadow-md space-y-3 border-t-4 border-purple-500">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <button onclick="unlockLoginHistory()" class="font-bold text-purple-800 hover:text-purple-600 flex items-center gap-1.5 text-base">
+                            <span>📜 Lịch sử đăng nhập</span>
+                            <span id="login-history-lock-badge" class="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border">(Bấm để xem)</span>
+                        </button>
+                        <div id="login-history-actions" class="hidden items-center gap-2">
+                            <button onclick="lockLoginHistory()" class="text-xs text-gray-500 hover:text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded border">🔒 Ẩn</button>
+                            <button onclick="clearLoginHistoryWithPassword()" class="text-xs text-red-500 hover:underline font-medium">Xóa hết</button>
+                        </div>
+                    </div>
+
+                    <div id="login-history-locked-box" class="p-4 bg-gray-50 rounded-lg text-center space-y-2 border border-dashed border-gray-300">
+                        <p class="text-xs text-gray-500 font-medium">🔒 Lịch sử đăng nhập đang bị khóa</p>
+                        <button onclick="unlockLoginHistory()" class="bg-purple-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-purple-800 shadow">
+                            🔓 Mở khóa xem lịch sử đăng nhập
+                        </button>
+                    </div>
+
+                    <div id="login-history-content-box" class="hidden">
+                        <div id="login-history-list" class="space-y-2 text-xs max-h-72 overflow-y-auto">
+                            <p class="text-gray-400 italic text-center py-2">Chưa có nhật ký đăng nhập.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
-        <div>
-          <button class="btn-danger" onclick="handleDeleteVehicle(${vehicle.id})">Xóa Xe</button>
+    </div>
+
+    <!-- 3. MODAL ĐỔI XE -->
+    <div id="change-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-5 w-full max-w-sm space-y-4">
+            <h3 class="font-bold text-lg text-amber-600">🔄 Đổi xe thuê</h3>
+            <p class="text-xs text-gray-600">Chọn xe mới để chuyển thời gian thuê của <b id="old-bike-label"></b> sang:</p>
+            <select id="select-new-bike" class="w-full p-2 border rounded-lg bg-gray-50 text-sm">
+                <option value="">-- Chọn xe mới --</option>
+            </select>
+            <div class="flex gap-2">
+                <button onclick="closeChangeBikeModal()" class="w-1/2 bg-gray-200 py-2 rounded-lg font-semibold text-sm">Hủy</button>
+                <button onclick="confirmChangeBike()" class="w-1/2 bg-amber-500 text-white py-2 rounded-lg font-semibold text-sm hover:bg-amber-600">Xác nhận đổi</button>
+            </div>
         </div>
-      `;
-      listContainer.appendChild(item);
-    });
-  }
+    </div>
 
-  // Yêu cầu 2: Xử lý Xóa xe
-  function handleDeleteVehicle(vehicleId) {
-    const vehicle = vehicles.find(v => v.id === vehicleId);
-    if (!vehicle) return;
+    <!-- 4. MODAL GIAO DIỆN ADMIN QUẢN LÝ TÀI KHOẢN -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/60 hidden z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-5 w-full max-w-md space-y-4 max-h-[90vh] flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-lg text-amber-600 flex items-center gap-1.5">
+                    <span>⚙️ Admin Quản Lý System</span>
+                </h3>
+                <button onclick="closeAdminModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            </div>
 
-    // Yêu cầu 4: Nhân viên không có quyền xóa bất kỳ xe nào
-    if (currentUserRole === 'staff') {
-      alert("❌ LỖI: Tài khoản Nhân viên không có quyền xóa xe!");
-      return;
-    }
+            <div class="overflow-y-auto space-y-5 pr-1 flex-1">
+                <!-- FORM TẠO / ĐỔI MẬT KHẨU & PHÂN QUYỀN -->
+                <div class="bg-amber-50/60 p-3.5 rounded-lg border border-amber-200 space-y-3">
+                    <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wide">👤 Quản Lý Tài Khoản & Phân Quyền</h4>
+                    <div class="space-y-2">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="admin-input-id" placeholder="Mã ID (vd: nv01)" class="p-2 border rounded text-xs bg-white">
+                            <input type="text" id="admin-input-name" placeholder="Tên người dùng (vd: Nguyễn Văn A)" class="p-2 border rounded text-xs bg-white">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="password" id="admin-input-pass" placeholder="Mật khẩu" class="p-2 border rounded text-xs bg-white">
+                            <select id="admin-input-role" class="w-full p-2 border rounded text-xs bg-white font-medium">
+                                <option value="STAFF">Nhân viên (Không xem doanh thu, lịch sử)</option>
+                                <option value="OWNER">Chủ xe (Xem tất cả giao diện)</option>
+                            </select>
+                        </div>
+                        <button onclick="saveUserFromAdmin()" class="w-full bg-amber-600 text-white text-xs font-bold py-2 rounded hover:bg-amber-700 shadow">
+                            💾 Lưu / Cập Nhật Tài Khoản
+                        </button>
+                    </div>
+                </div>
 
-    // Yêu cầu 2: Xe đang cho thuê CHỈ CÓ CHỦ XE mới được xóa
-    if (vehicle.status === 'rented' && currentUserRole !== 'owner') {
-      alert("❌ LỖI QUYỀN TRUY CẬP: Xe đang cho thuê, CHỈ CHỦ XE mới có quyền xóa!");
-      return;
-    }
+                <!-- DANH SÁCH TÀI KHOẢN -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-700">Danh sách tài khoản (<span id="user-count-badge">0</span>):</h4>
+                    <div id="admin-user-list" class="space-y-1.5 text-xs max-h-40 overflow-y-auto"></div>
+                </div>
+            </div>
 
-    // Xóa xe nếu thỏa mãn các điều kiện
-    if (confirm(`Bạn có chắc chắn muốn xóa "${vehicle.name}" không?`)) {
-      vehicles = vehicles.filter(v => v.id !== vehicleId);
-      renderVehicleList();
-      alert("✅ Đã xóa xe thành công!");
-    }
-  }
+            <div class="border-t pt-3 flex justify-end">
+                <button onclick="closeAdminModal()" class="bg-slate-200 hover:bg-slate-300 font-semibold text-xs px-4 py-2 rounded-lg">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
 
-  // Các tác vụ cho Nhân viên (Yêu cầu 4)
-  function actionSelectVehicle() { alert("Thực hiện: Chọn xe cho thuê"); }
-  function actionScanQR() { alert("Thực hiện: Quét mã QR"); }
-  function actionChangeVehicle() { alert("Thực hiện: Đổi xe"); }
-  function actionEndRental() { alert("Thực hiện: Kết thúc thuê xe"); }
+    <script>
+        const TOTAL_BIKES = 100;
+        const ADMIN_ACCESS_PASS = "123456@@@"; // Mật khẩu truy cập Admin
+        const VIEW_PASSWORD = "123456@@";       // Mật khẩu mở báo cáo nhanh
+        const RESET_PASSWORD = "123456@@@";    // Mật khẩu reset doanh thu
 
-  // Các thao tác Cấu hình nằm ở cuối giao diện (Yêu cầu 1)
-  function saveVehicleName() {
-    const val = document.getElementById('renameInput').value;
-    if (!val) return alert("Vui lòng nhập tên mới!");
-    alert(`✅ Đã đổi tên xe thành: ${val}`);
-    document.getElementById('renameInput').value = '';
-  }
+        // Quản lý Danh sách Tài khoản ID, Tên & Phân Quyền
+        let users = JSON.parse(localStorage.getItem('app_users_v3') || '{}');
+        if (Object.keys(users).length === 0) {
+            users['123456'] = { name: 'Chủ Xe (Mặc định)', pass: '123456@@', role: 'OWNER' };
+            localStorage.setItem('app_users_v3', JSON.stringify(users));
+        }
 
-  function savePriceConfig() {
-    const val = document.getElementById('priceInput').value;
-    if (!val) return alert("Vui lòng nhập giá!");
-    alert(`✅ Đã cập nhật giá thuê thành: ${Number(val).toLocaleString()} VNĐ/giờ`);
-    document.getElementById('priceInput').value = '';
-  }
-</script>
+        let loginHistory = JSON.parse(localStorage.getItem('app_login_history') || '[]');
+        let bikePrices = JSON.parse(localStorage.getItem('app_bike_prices') || '{}');
+        let bikeCustomNames = JSON.parse(localStorage.getItem('app_bike_names') || '{}');
+        let currentUser = localStorage.getItem('logged_in_user') || null;
 
+        let rentals = JSON.parse(localStorage.getItem('rentals') || '{}');
+        let historyData = JSON.parse(localStorage.getItem('rental_history') || '[]');
+        let selectedBikeId = null;
+        let isScanningLock = false;
+
+        let isDailyUnlocked = false;
+        let isMonthlyUnlocked = false;
+        let isHistoryUnlocked = false;
+        let isLoginHistoryUnlocked = false;
+
+        let html5QrCode = null;
+        let isCameraActive = false;
+
+        // Khởi tạo ngày tháng mặc định
+        const todayStr = new Date().toISOString().split('T')[0];
+        const thisMonthStr = todayStr.substring(0, 7);
+        document.getElementById('daily-date-picker').value = todayStr;
+        document.getElementById('monthly-picker').value = thisMonthStr;
+
+        // Định dạng mã xe dạng 4 chữ số (ví dụ: 0001, 0050, 0100)
+        function formatBikeId(num) {
+            return String(num).padStart(4, '0');
+        }
+
+        // Lấy tên hiển thị đầy đủ của xe (Mã xe + Tên tùy chỉnh nếu có)
+        function getBikeDisplayName(bikeId) {
+            if (!bikeId) return '';
+            let customName = bikeCustomNames[bikeId];
+            return customName ? `${customName} (${bikeId})` : `Xe ${bikeId}`;
+        }
+
+        // Khởi tạo các danh sách chọn xe trên giao diện
+        function initBikeOptions() {
+            const selectElem = document.getElementById('select-bike');
+            const renameSelect = document.getElementById('rename-bike-select');
+
+            selectElem.innerHTML = '<option value="">-- Chọn xe --</option>';
+            renameSelect.innerHTML = '<option value="">-- Chọn xe --</option>';
+
+            for (let i = 1; i <= TOTAL_BIKES; i++) {
+                let formatted = formatBikeId(i);
+                let displayName = getBikeDisplayName(formatted);
+
+                let option = document.createElement('option');
+                option.value = formatted;
+                option.textContent = displayName;
+                selectElem.appendChild(option);
+
+                let optionRename = document.createElement('option');
+                optionRename.value = formatted;
+                optionRename.textContent = displayName;
+                renameSelect.appendChild(optionRename);
+            }
+        }
+
+        // XỬ LÝ ĐỔI TÊN XE
+        function onRenameBikeSelectChange() {
+            const bikeId = document.getElementById('rename-bike-select').value;
+            const inputElem = document.getElementById('rename-bike-input');
+            if (bikeId && bikeCustomNames[bikeId]) {
+                inputElem.value = bikeCustomNames[bikeId];
+            } else {
+                inputElem.value = '';
+            }
+        }
+
+        function saveBikeName() {
+            const bikeId = document.getElementById('rename-bike-select').value;
+            const newName = document.getElementById('rename-bike-input').value.trim();
+
+            if (!bikeId) {
+                alert("Vui lòng chọn xe muốn đổi tên!");
+                return;
+            }
+
+            if (newName === "") {
+                delete bikeCustomNames[bikeId];
+            } else {
+                bikeCustomNames[bikeId] = newName;
+            }
+
+            localStorage.setItem('app_bike_names', JSON.stringify(bikeCustomNames));
+            
+            // Cập nhật lại toàn bộ giao diện
+            initBikeOptions();
+            if (selectedBikeId) {
+                document.getElementById('select-bike').value = selectedBikeId;
+                checkBikeStatus();
+            }
+            document.getElementById('rename-bike-select').value = bikeId;
+            renderActiveRentals();
+            if (isDailyUnlocked) renderDailyReport();
+            if (isMonthlyUnlocked) renderMonthlyReport();
+            if (isHistoryUnlocked) renderHistoryList();
+
+            alert(`Đã cập nhật tên xe cho Mã Xe ${bikeId} thành công!`);
+        }
+
+        // XỬ LÝ ĐĂNG NHẬP / ĐĂNG XUẤT & PHÂN QUYỀN GIAO DIỆN
+        function checkAuth() {
+            if (currentUser && users[currentUser]) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                
+                const userInfo = users[currentUser];
+                const displayName = userInfo.name ? `${userInfo.name} (${currentUser})` : currentUser;
+                document.getElementById('current-user-display').textContent = displayName;
+
+                const role = userInfo.role || 'STAFF';
+                const ownerSections = document.getElementById('owner-only-sections');
+                const roleBadge = document.getElementById('current-role-badge');
+
+                if (role === 'OWNER') {
+                    ownerSections.classList.remove('hidden');
+                    roleBadge.textContent = 'Quyền: Chủ xe';
+                } else {
+                    ownerSections.classList.add('hidden');
+                    roleBadge.textContent = 'Quyền: Nhân viên';
+                }
+                renderActiveRentals();
+                onCategoryChange();
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+            }
+        }
+
+        function handleUserLogin(e) {
+            e.preventDefault();
+            const idInput = document.getElementById('login-id').value.trim();
+            const passInput = document.getElementById('login-pass').value.trim();
+            const errorMsg = document.getElementById('login-error-msg');
+
+            if (users[idInput] && users[idInput].pass === passInput) {
+                currentUser = idInput;
+                localStorage.setItem('logged_in_user', currentUser);
+
+                const now = new Date();
+                const newLog = {
+                    id: idInput,
+                    name: users[idInput].name || 'Chưa đặt tên',
+                    loginTime: now.toISOString()
+                };
+                loginHistory.unshift(newLog);
+                localStorage.setItem('app_login_history', JSON.stringify(loginHistory));
+
+                errorMsg.classList.add('hidden');
+                document.getElementById('login-id').value = '';
+                document.getElementById('login-pass').value = '';
+                checkAuth();
+            } else {
+                errorMsg.textContent = "ID hoặc mật khẩu không chính xác!";
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            if (confirm("Bạn muốn đăng xuất khỏi ứng dụng?")) {
+                currentUser = null;
+                localStorage.removeItem('logged_in_user');
+                stopQrScanner();
+                checkAuth();
+            }
+        }
+
+        // GIAO DIỆN ADMIN QUẢN LÝ TÀI KHOẢN
+        function openAdminModal() {
+            let pass = prompt("Nhập mật khẩu Admin để truy cập:");
+            if (pass === ADMIN_ACCESS_PASS) {
+                renderAdminUserList();
+                document.getElementById('admin-modal').classList.remove('hidden');
+            } else if (pass !== null) {
+                alert("Mật khẩu Admin không chính xác!");
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+            document.getElementById('admin-input-id').value = '';
+            document.getElementById('admin-input-name').value = '';
+            document.getElementById('admin-input-pass').value = '';
+        }
+
+        function renderAdminUserList() {
+            const listElem = document.getElementById('admin-user-list');
+            const countElem = document.getElementById('user-count-badge');
+            let userKeys = Object.keys(users);
+            countElem.textContent = userKeys.length;
+
+            let html = '';
+            userKeys.forEach(id => {
+                let isDefault = id === '123456';
+                let userName = users[id].name || 'Chưa đặt tên';
+                let roleText = users[id].role === 'OWNER' ? 'Chủ xe' : 'Nhân viên';
+                let roleColor = users[id].role === 'OWNER' ? 'text-amber-600 bg-amber-50' : 'text-blue-600 bg-blue-50';
+                
+                html += `
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded border">
+                        <div>
+                            <b class="text-slate-800">${id}</b> - <span class="font-medium text-slate-700">${userName}</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded font-semibold ${roleColor} ml-1">${roleText}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="fillAdminEdit('${id}')" class="text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100">Sửa</button>
+                            ${!isDefault ? `<button onclick="deleteUserFromAdmin('${id}')" class="text-red-600 bg-red-50 px-2 py-1 rounded hover:bg-red-100">Xóa</button>` : `<span class="text-[10px] text-gray-400 px-1">(Gốc)</span>`}
+                        </div>
+                    </div>
+                `;
+            });
+            listElem.innerHTML = html;
+        }
+
+        function fillAdminEdit(id) {
+            document.getElementById('admin-input-id').value = id;
+            document.getElementById('admin-input-name').value = users[id].name || '';
+            document.getElementById('admin-input-pass').value = users[id].pass;
+            document.getElementById('admin-input-role').value = users[id].role || 'STAFF';
+            document.getElementById('admin-input-name').focus();
+        }
+
+        function saveUserFromAdmin() {
+            const id = document.getElementById('admin-input-id').value.trim();
+            const name = document.getElementById('admin-input-name').value.trim();
+            const pass = document.getElementById('admin-input-pass').value.trim();
+            const role = document.getElementById('admin-input-role').value;
+
+            if (!id || !pass || !name) {
+                alert("Vui lòng nhập đầy đủ Mã ID, Tên người dùng và Mật khẩu!");
+                return;
+            }
+
+            users[id] = { name: name, pass: pass, role: role };
+            localStorage.setItem('app_users_v3', JSON.stringify(users));
+            renderAdminUserList();
+            checkAuth();
+            
+            document.getElementById('admin-input-id').value = '';
+            document.getElementById('admin-input-name').value = '';
+            document.getElementById('admin-input-pass').value = '';
+            alert(`Đã lưu tài khoản ${name} (${id}) thành công!`);
+        }
+
+        function deleteUserFromAdmin(id) {
+            if (id === '123456') {
+                alert("Không thể xóa tài khoản ID gốc (123456)!");
+                return;
+            }
+            if (confirm(`Bạn chắc chắn muốn xóa tài khoản ID: ${id}?`)) {
+                delete users[id];
+                localStorage.setItem('app_users_v3', JSON.stringify(users));
+                renderAdminUserList();
+            }
+        }
+
+        // CẤU HÌNH BẢNG GIÁ THEO LOẠI XE / MÃ XE
+        function onCategoryChange() {
+            const cat = document.getElementById('price-category-select').value;
+            const bikeSelect = document.getElementById('price-bike-select');
+            bikeSelect.innerHTML = '<option value="ALL">-- Áp dụng toàn bộ loại xe này --</option>';
+
+            let start = cat === 'SMALL' ? 1 : 51;
+            let end = cat === 'SMALL' ? 50 : 100;
+
+            for (let i = start; i <= end; i++) {
+                let formatted = formatBikeId(i);
+                let displayName = getBikeDisplayName(formatted);
+                let opt = document.createElement('option');
+                opt.value = formatted;
+                opt.textContent = `Riêng ${displayName}`;
+                bikeSelect.appendChild(opt);
+            }
+        }
+
+        function saveBikePriceConfig() {
+            const cat = document.getElementById('price-category-select').value;
+            const targetBike = document.getElementById('price-bike-select').value;
+            const unit = document.getElementById('price-unit-select').value;
+            const amount = parseFloat(document.getElementById('price-amount-input').value);
+
+            if (isNaN(amount) || amount <= 0) {
+                alert("Vui lòng nhập giá tiền hợp lệ!");
+                return;
+            }
+
+            if (targetBike === 'ALL') {
+                bikePrices[cat] = { unit: unit, amount: amount };
+            } else {
+                bikePrices[targetBike] = { unit: unit, amount: amount };
+            }
+
+            localStorage.setItem('app_bike_prices', JSON.stringify(bikePrices));
+            alert("Đã lưu cài đặt giá tiền thành công!");
+            document.getElementById('price-amount-input').value = '';
+            
+            if (selectedBikeId) {
+                checkBikeStatus();
+            }
+        }
+
+        function getBikePriceInfo(bikeId) {
+            if (bikePrices[bikeId]) {
+                return bikePrices[bikeId];
+            }
+            let num = parseInt(bikeId, 10);
+            let cat = (num >= 1 && num <= 50) ? 'SMALL' : 'LARGE';
+            if (bikePrices[cat]) {
+                return bikePrices[cat];
+            }
+            // Mặc định nếu chưa cấu hình
+            return cat === 'SMALL' ? { unit: 'MINUTE', amount: 200 } : { unit: 'MINUTE', amount: 300 };
+        }
+
+        // ĐỌC MÃ QR REALTIME
+        function toggleQrScanner() {
+            if (isCameraActive) {
+                stopQrScanner();
+            } else {
+                startQrScanner();
+            }
+        }
+
+        function startQrScanner() {
+            document.getElementById('qr-container').classList.remove('hidden');
+            document.getElementById('btn-toggle-qr').innerHTML = '❌ Đang mở camera (Bấm để tắt)';
+            isCameraActive = true;
+
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 220, height: 220 } },
+                (decodedText) => {
+                    if (isScanningLock) return;
+                    isScanningLock = true;
+                    
+                    let cleanId = decodedText.trim().replace(/\D/g, '');
+                    if (cleanId) {
+                        let formattedId = formatBikeId(cleanId);
+                        document.getElementById('select-bike').value = formattedId;
+                        checkBikeStatus();
+                    }
+                    
+                    setTimeout(() => { isScanningLock = false; }, 1500);
+                },
+                (errorMessage) => {}
+            ).catch(err => {
+                alert("Không thể mở Camera. Vui lòng cấp quyền truy cập Camera cho trình duyệt!");
+                stopQrScanner();
+            });
+        }
+
+        function stopQrScanner() {
+            if (html5QrCode && isCameraActive) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('qr-container').classList.add('hidden');
+                    document.getElementById('btn-toggle-qr').innerHTML = '📷 Bấm vào để quét mã QR';
+                    isCameraActive = false;
+                }).catch(err => {
+                    document.getElementById('qr-container').classList.add('hidden');
+                    isCameraActive = false;
+                });
+            } else {
+                document.getElementById('qr-container').classList.add('hidden');
+                document.getElementById('btn-toggle-qr').innerHTML = '📷 Bấm vào để quét mã QR';
+                isCameraActive = false;
+            }
+        }
+
+        // KIỂM TRẢ TRẠNG THÁI XE & BẮT ĐẦU/KẾT THÚC THUÊ
+        function checkBikeStatus() {
+            const bikeId = document.getElementById('select-bike').value;
+            const actionCard = document.getElementById('action-card');
+            
+            if (!bikeId) {
+                actionCard.classList.add('hidden');
+                selectedBikeId = null;
+                return;
+            }
+
+            selectedBikeId = bikeId;
+            actionCard.classList.remove('hidden');
+
+            const customName = bikeCustomNames[bikeId];
+            document.getElementById('card-bike-id').textContent = `MÃ XE: ${bikeId}`;
+            if (customName) {
+                document.getElementById('card-bike-custom-name').textContent = `Tên xe: ${customName}`;
+                document.getElementById('card-bike-custom-name').classList.remove('hidden');
+            } else {
+                document.getElementById('card-bike-custom-name').classList.add('hidden');
+            }
+
+            const activeRental = rentals[bikeId];
+            const priceInfo = getBikePriceInfo(bikeId);
+            const unitText = priceInfo.unit === 'MINUTE' ? 'VNĐ/Phút' : 'VNĐ/Giờ';
+
+            if (activeRental) {
+                actionCard.className = "bg-white p-5 rounded-xl shadow-lg border-l-4 border-red-500 space-y-3";
+                document.getElementById('card-status-badge').className = "px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700";
+                document.getElementById('card-status-badge').textContent = "ĐANG ĐƯỢC THUÊ";
+
+                let startTime = new Date(activeRental.startTime);
+                document.getElementById('card-details').innerHTML = `
+                    <p><b>Thời gian bắt đầu:</b> ${startTime.toLocaleTimeString()} - ${startTime.toLocaleDateString()}</p>
+                    <p><b>Mức giá:</b> <span class="text-blue-600 font-semibold">${priceInfo.amount.toLocaleString()} ${unitText}</span></p>
+                    <p><b>Người cho thuê:</b> ${activeRental.createdBy || 'Hệ thống'}</p>
+                `;
+
+                document.getElementById('btn-start').classList.add('hidden');
+                document.getElementById('btn-stop').classList.remove('hidden');
+                document.getElementById('btn-change').classList.remove('hidden');
+            } else {
+                actionCard.className = "bg-white p-5 rounded-xl shadow-lg border-l-4 border-green-500 space-y-3";
+                document.getElementById('card-status-badge').className = "px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700";
+                document.getElementById('card-status-badge').textContent = "XE ĐANG RẢNH";
+
+                document.getElementById('card-details').innerHTML = `
+                    <p><b>Mức giá áp dụng:</b> <span class="text-blue-600 font-semibold">${priceInfo.amount.toLocaleString()} ${unitText}</span></p>
+                    <p class="text-xs text-gray-500">Sẵn sàng phục vụ khách hàng mới.</p>
+                `;
+
+                document.getElementById('btn-start').classList.remove('hidden');
+                document.getElementById('btn-stop').classList.add('hidden');
+                document.getElementById('btn-change').classList.add('hidden');
+            }
+        }
+
+        function startRental() {
+            if (!selectedBikeId) return;
+
+            const now = new Date();
+            const userInfo = users[currentUser];
+            
+            rentals[selectedBikeId] = {
+                startTime: now.toISOString(),
+                createdBy: userInfo ? userInfo.name : currentUser
+            };
+
+            localStorage.setItem('rentals', JSON.stringify(rentals));
+            checkBikeStatus();
+            renderActiveRentals();
+            alert(`Đã kích hoạt cho thuê ${getBikeDisplayName(selectedBikeId)} thành công!`);
+        }
+
+        function stopRental() {
+            if (!selectedBikeId || !rentals[selectedBikeId]) return;
+
+            const rental = rentals[selectedBikeId];
+            const startTime = new Date(rental.startTime);
+            const endTime = new Date();
+
+            let durationMinutes = Math.max(1, Math.ceil((endTime - startTime) / (1000 * 60)));
+            const priceInfo = getBikePriceInfo(selectedBikeId);
+
+            let totalMoney = 0;
+            if (priceInfo.unit === 'MINUTE') {
+                totalMoney = durationMinutes * priceInfo.amount;
+            } else {
+                let durationHours = Math.ceil(durationMinutes / 60);
+                totalMoney = durationHours * priceInfo.amount;
+            }
+
+            let displayName = getBikeDisplayName(selectedBikeId);
+
+            if (confirm(`Xác nhận trả ${displayName}?
+
+• Thời gian dùng: ${durationMinutes} phút
+• Tổng tiền thanh toán: ${totalMoney.toLocaleString()} VNĐ`)) {
+                const historyRecord = {
+                    bikeId: selectedBikeId,
+                    startTime: rental.startTime,
+                    endTime: endTime.toISOString(),
+                    durationMinutes: durationMinutes,
+                    totalMoney: totalMoney,
+                    createdBy: rental.createdBy,
+                    stoppedBy: users[currentUser] ? users[currentUser].name : currentUser
+                };
+
+                historyData.unshift(historyRecord);
+                localStorage.setItem('rental_history', JSON.stringify(historyData));
+
+                delete rentals[selectedBikeId];
+                localStorage.setItem('rentals', JSON.stringify(rentals));
+
+                checkBikeStatus();
+                renderActiveRentals();
+                if (isDailyUnlocked) renderDailyReport();
+                if (isMonthlyUnlocked) renderMonthlyReport();
+                if (isHistoryUnlocked) renderHistoryList();
+
+                alert(`Đã trả thành công ${displayName}. Thu của khách: ${totalMoney.toLocaleString()} VNĐ.`);
+            }
+        }
+
+        // XÓA LƯỢT THUÊ ĐANG HOẠT ĐỘNG (KHÔNG TÍNH TIỀN)
+        function cancelActiveRental(bikeId) {
+            let displayName = getBikeDisplayName(bikeId);
+            if (confirm(`Bạn chắc chắn muốn XÓA / HỦY lượt thuê của ${displayName}?
+
+Lưu ý: Lượt thuê này sẽ bị hủy bỏ hoàn toàn và KHÔNG ghi nhận doanh thu.`)) {
+                delete rentals[bikeId];
+                localStorage.setItem('rentals', JSON.stringify(rentals));
+
+                if (selectedBikeId === bikeId) {
+                    checkBikeStatus();
+                }
+                renderActiveRentals();
+                alert(`Đã xóa lượt thuê của ${displayName}!`);
+            }
+        }
+
+        // ĐỔI XE GIỮ NGUYÊN THỜI GIAN THUÊ
+        function openChangeBikeModal() {
+            if (!selectedBikeId || !rentals[selectedBikeId]) return;
+            
+            document.getElementById('old-bike-label').textContent = getBikeDisplayName(selectedBikeId);
+            const selectNew = document.getElementById('select-new-bike');
+            selectNew.innerHTML = '<option value="">-- Chọn xe mới --</option>';
+
+            for (let i = 1; i <= TOTAL_BIKES; i++) {
+                let formatted = formatBikeId(i);
+                if (formatted !== selectedBikeId && !rentals[formatted]) {
+                    let opt = document.createElement('option');
+                    opt.value = formatted;
+                    opt.textContent = `${getBikeDisplayName(formatted)} (Đang rảnh)`;
+                    selectNew.appendChild(opt);
+                }
+            }
+
+            document.getElementById('change-modal').classList.remove('hidden');
+        }
+
+        function closeChangeBikeModal() {
+            document.getElementById('change-modal').classList.add('hidden');
+        }
+
+        function confirmChangeBike() {
+            const newBikeId = document.getElementById('select-new-bike').value;
+            if (!newBikeId) {
+                alert("Vui lòng chọn xe mới muốn chuyển tới!");
+                return;
+            }
+
+            rentals[newBikeId] = rentals[selectedBikeId];
+            delete rentals[selectedBikeId];
+            localStorage.setItem('rentals', JSON.stringify(rentals));
+
+            closeChangeBikeModal();
+            document.getElementById('select-bike').value = newBikeId;
+            checkBikeStatus();
+            renderActiveRentals();
+            alert(`Đã chuyển lượt thuê sang ${getBikeDisplayName(newBikeId)} thành công!`);
+        }
+
+        // DANH SÁCH XE ĐANG HOẠT ĐỘNG
+        function renderActiveRentals() {
+            const listElem = document.getElementById('active-rentals-list');
+            const countElem = document.getElementById('active-count');
+            let activeKeys = Object.keys(rentals);
+            
+            countElem.textContent = `${activeKeys.length} xe`;
+
+            if (activeKeys.length === 0) {
+                listElem.innerHTML = '<p class="text-gray-400 italic text-center py-2">Hiện chưa có xe nào đang thuê.</p>';
+                return;
+            }
+
+            let html = '';
+            activeKeys.forEach(bikeId => {
+                let item = rentals[bikeId];
+                let startTime = new Date(item.startTime);
+                let mins = Math.max(1, Math.ceil((new Date() - startTime) / (1000 * 60)));
+                let displayName = getBikeDisplayName(bikeId);
+
+                html += `
+                    <div class="flex justify-between items-center p-2.5 bg-blue-50/60 rounded-lg border border-blue-100">
+                        <div>
+                            <b class="text-blue-900 text-base">${displayName}</b>
+                            <span class="text-xs text-gray-500 block">Thuê lúc: ${startTime.toLocaleTimeString()} (${mins} phút trước)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="quickSelectBike('${bikeId}')" class="text-xs bg-blue-600 text-white font-semibold px-2.5 py-1.5 rounded-lg shadow hover:bg-blue-700">
+                                Xử lý
+                            </button>
+                            <button onclick="cancelActiveRental('${bikeId}')" class="text-xs bg-red-500 text-white font-semibold px-2.5 py-1.5 rounded-lg shadow hover:bg-red-600" title="Hủy lượt thuê">
+                                Xóa
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            listElem.innerHTML = html;
+        }
+
+        function quickSelectBike(bikeId) {
+            document.getElementById('select-bike').value = bikeId;
+            checkBikeStatus();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // KHÓA / MỞ KHÓA BÁO CÁO & LỊCH SỬ
+        function unlockDailyReport() {
+            let pass = prompt("Nhập mật khẩu để xem Doanh thu ngày:");
+            if (pass === VIEW_PASSWORD || pass === ADMIN_ACCESS_PASS) {
+                isDailyUnlocked = true;
+                document.getElementById('daily-locked-box').classList.add('hidden');
+                document.getElementById('daily-content-box').classList.remove('hidden');
+                renderDailyReport();
+            } else if (pass !== null) {
+                alert("Mật khẩu không chính xác!");
+            }
+        }
+
+        function lockDailyReport() {
+            isDailyUnlocked = false;
+            document.getElementById('daily-locked-box').classList.remove('hidden');
+            document.getElementById('daily-content-box').classList.add('hidden');
+        }
+
+        function renderDailyReport() {
+            if (!isDailyUnlocked) return;
+            const targetDate = document.getElementById('daily-date-picker').value;
+            
+            let totalMoney = 0;
+            let count = 0;
+
+            historyData.forEach(item => {
+                let itemDate = item.endTime.split('T')[0];
+                if (itemDate === targetDate) {
+                    totalMoney += item.totalMoney;
+                    count++;
+                }
+            });
+
+            document.getElementById('daily-total-money').textContent = `${totalMoney.toLocaleString()} VNĐ`;
+            document.getElementById('daily-total-count').textContent = `${count} lượt`;
+        }
+
+        function resetDailyData() {
+            let pass = prompt("Nhập mật khẩu cấp cao để Reset doanh thu ngày:");
+            if (pass === RESET_PASSWORD) {
+                const targetDate = document.getElementById('daily-date-picker').value;
+                historyData = historyData.filter(item => item.endTime.split('T')[0] !== targetDate);
+                localStorage.setItem('rental_history', JSON.stringify(historyData));
+                renderDailyReport();
+                alert(`Đã xóa dữ liệu doanh thu của ngày ${targetDate}!`);
+            } else if (pass !== null) {
+                alert("Mật khẩu Reset không đúng!");
+            }
+        }
+
+        function unlockMonthlyReport() {
+            let pass = prompt("Nhập mật khẩu để xem Doanh thu tháng:");
+            if (pass === VIEW_PASSWORD || pass === ADMIN_ACCESS_PASS) {
+                isMonthlyUnlocked = true;
+                document.getElementById('monthly-locked-box').classList.add('hidden');
+                document.getElementById('monthly-content-box').classList.remove('hidden');
+                renderMonthlyReport();
+            } else if (pass !== null) {
+                alert("Mật khẩu không chính xác!");
+            }
+        }
+
+        function lockMonthlyReport() {
+            isMonthlyUnlocked = false;
+            document.getElementById('monthly-locked-box').classList.remove('hidden');
+            document.getElementById('monthly-content-box').classList.add('hidden');
+        }
+
+        function renderMonthlyReport() {
+            if (!isMonthlyUnlocked) return;
+            const targetMonth = document.getElementById('monthly-picker').value;
+            const listElem = document.getElementById('monthly-bike-list');
+
+            let bikeTotals = {};
+            let grandTotal = 0;
+
+            historyData.forEach(item => {
+                let itemMonth = item.endTime.substring(0, 7);
+                if (itemMonth === targetMonth) {
+                    bikeTotals[item.bikeId] = (bikeTotals[item.bikeId] || 0) + item.totalMoney;
+                    grandTotal += item.totalMoney;
+                }
+            });
+
+            document.getElementById('monthly-grand-total').textContent = `${grandTotal.toLocaleString()} VNĐ`;
+
+            let sortedBikes = Object.keys(bikeTotals).sort((a, b) => bikeTotals[b] - bikeTotals[a]);
+
+            if (sortedBikes.length === 0) {
+                listElem.innerHTML = '<p class="text-gray-400 italic text-center py-2">Không có doanh thu trong tháng này.</p>';
+                return;
+            }
+
+            let html = '';
+            sortedBikes.forEach(bikeId => {
+                let displayName = getBikeDisplayName(bikeId);
+                html += `
+                    <div class="flex justify-between items-center p-1.5 bg-gray-50 rounded border">
+                        <span><b>${displayName}</b></span>
+                        <b class="text-indigo-700">${bikeTotals[bikeId].toLocaleString()} VNĐ</b>
+                    </div>
+                `;
+            });
+            listElem.innerHTML = html;
+        }
+
+        function resetMonthlyData() {
+            let pass = prompt("Nhập mật khẩu cấp cao để Reset doanh thu tháng:");
+            if (pass === RESET_PASSWORD) {
+                const targetMonth = document.getElementById('monthly-picker').value;
+                historyData = historyData.filter(item => item.endTime.substring(0, 7) !== targetMonth);
+                localStorage.setItem('rental_history', JSON.stringify(historyData));
+                renderMonthlyReport();
+                alert(`Đã xóa dữ liệu doanh thu của tháng ${targetMonth}!`);
+            } else if (pass !== null) {
+                alert("Mật khẩu Reset không đúng!");
+            }
+        }
+
+        function unlockHistory() {
+            if (isHistoryUnlocked) {
+                lockHistory();
+                return;
+            }
+            let pass = prompt("Nhập mật khẩu để xem Lịch sử thuê:");
+            if (pass === VIEW_PASSWORD || pass === ADMIN_ACCESS_PASS) {
+                isHistoryUnlocked = true;
+                document.getElementById('history-locked-box').classList.add('hidden');
+                document.getElementById('history-content-box').classList.remove('hidden');
+                document.getElementById('history-actions').classList.remove('hidden');
+                document.getElementById('history-actions').classList.add('flex');
+                document.getElementById('history-lock-status-badge').textContent = '(Đã mở khóa)';
+                renderHistoryList();
+            } else if (pass !== null) {
+                alert("Mật khẩu không chính xác!");
+            }
+        }
+
+        function lockHistory() {
+            isHistoryUnlocked = false;
+            document.getElementById('history-locked-box').classList.remove('hidden');
+            document.getElementById('history-content-box').classList.add('hidden');
+            document.getElementById('history-actions').classList.add('hidden');
+            document.getElementById('history-actions').classList.remove('flex');
+            document.getElementById('history-lock-status-badge').textContent = '(Bấm để xem)';
+        }
+
+        function renderHistoryList() {
+            if (!isHistoryUnlocked) return;
+            const listElem = document.getElementById('history-list');
+
+            if (historyData.length === 0) {
+                listElem.innerHTML = '<p class="text-gray-400 italic text-center py-2">Chưa có lịch sử giao dịch.</p>';
+                return;
+            }
+
+            let html = '';
+            historyData.forEach(item => {
+                let start = new Date(item.startTime);
+                let end = new Date(item.endTime);
+                let displayName = getBikeDisplayName(item.bikeId);
+
+                html += `
+                    <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
+                        <div class="flex justify-between font-bold">
+                            <span class="text-blue-800">${displayName}</span>
+                            <span class="text-green-700">${item.totalMoney.toLocaleString()} VNĐ</span>
+                        </div>
+                        <div class="text-[11px] text-gray-500">
+                            <p>Tạo bởi: ${item.createdBy || 'N/A'} | Kết thúc bởi: ${item.stoppedBy || 'N/A'}</p>
+                            <p>Thời gian: ${start.toLocaleTimeString()} -> ${end.toLocaleTimeString()} (${item.durationMinutes} phút)</p>
+                            <p>Ngày: ${end.toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            listElem.innerHTML = html;
+        }
+
+        function clearHistoryWithPassword() {
+            let pass = prompt("Nhập mật khẩu cấp cao để xóa toàn bộ Lịch sử Thuê Xe:");
+            if (pass === RESET_PASSWORD) {
+                historyData = [];
+                localStorage.removeItem('rental_history');
+                renderHistoryList();
+                alert("Đã xóa sạch Lịch sử thuê xe!");
+            } else if (pass !== null) {
+                alert("Mật khẩu không chính xác!");
+            }
+        }
+
+        function unlockLoginHistory() {
+            if (isLoginHistoryUnlocked) {
+                lockLoginHistory();
+                return;
+            }
+            let pass = prompt("Nhập mật khẩu để xem Lịch sử Đăng nhập:");
+            if (pass === VIEW_PASSWORD || pass === ADMIN_ACCESS_PASS) {
+                isLoginHistoryUnlocked = true;
+                document.getElementById('login-history-locked-box').classList.add('hidden');
+                document.getElementById('login-history-content-box').classList.remove('hidden');
+                document.getElementById('login-history-actions').classList.remove('hidden');
+                document.getElementById('login-history-actions').classList.add('flex');
+                document.getElementById('login-history-lock-badge').textContent = '(Đã mở khóa)';
+                renderLoginHistoryList();
+            } else if (pass !== null) {
+                alert("Mật khẩu không chính xác!");
+            }
+        }
+
+        function lockLoginHistory() {
+            isLoginHistoryUnlocked = false;
+            document.getElementById('login-history-locked-box').classList.remove('hidden');
+            document.getElementById('login-history-content-box').classList.add('hidden');
+            document.getElementById('login-history-actions').classList.add('hidden');
+            document.getElementById('login-history-actions').classList.remove('flex');
+            document.getElementById('login-history-lock-badge').textContent = '(Bấm để xem)';
+        }
+
+        function renderLoginHistoryList() {
+            if (!isLoginHistoryUnlocked) return;
+            const listElem = document.getElementById('login-history-list');
+
+            if (loginHistory.length === 0) {
+                listElem.innerHTML = '<p class="text-gray-400 italic text-center py-2">Chưa có nhật ký đăng nhập.</p>';
+                return;
+            }
+
+            let html = '';
+            loginHistory.forEach(item => {
+                let timeStr = new Date(item.loginTime).toLocaleString();
+                html += `
+                    <div class="flex justify-between items-center p-2 bg-purple-50/50 rounded border border-purple-100">
+                        <div>
+                            <b class="text-purple-900">${item.name}</b> (${item.id})
+                        </div>
+                        <span class="text-[10px] text-gray-500">${timeStr}</span>
+                    </div>
+                `;
+            });
+            listElem.innerHTML = html;
+        }
+
+        function clearLoginHistoryWithPassword() {
+            let pass = prompt("Nhập mật khẩu cấp cao để xóa Lịch sử Đăng Nhập:");
+            if (pass === RESET_PASSWORD) {
+                loginHistory = [];
+                localStorage.removeItem('app_login_history');
+                renderLoginHistoryList();
+                alert("Đã xóa sạch Lịch sử đăng nhập!");
+            } else if (pass !== null) {
+                alert("Mật khẩu không chính xác!");
+            }
+        }
+
+        // KHỞI CHẠY LẦN ĐẦU
+        window.addEventListener('DOMContentLoaded', () => {
+            initBikeOptions();
+            checkAuth();
+        });
+    </script>
 </body>
 </html>

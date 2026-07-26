@@ -26,7 +26,10 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu</label>
-                    <input type="password" id="login-pass" required placeholder="Nhập mật khẩu" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    <div class="relative">
+                        <input type="password" id="login-pass" required placeholder="Nhập mật khẩu" class="w-full p-2.5 pr-10 border rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        <button type="button" onclick="togglePasswordVisibility('login-pass', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 text-sm focus:outline-none">👁️</button>
+                    </div>
                 </div>
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-500/30 transition">
                     ĐĂNG NHẬP
@@ -346,11 +349,17 @@
                     <div class="space-y-2">
                         <div>
                             <label class="block text-[11px] font-semibold text-gray-600 mb-0.5">Mật khẩu Mở/Ẩn (Doanh Thu & Lịch Sử):</label>
-                            <input type="password" id="admin-view-pass" class="w-full p-2 border rounded text-xs bg-white">
+                            <div class="relative">
+                                <input type="password" id="admin-view-pass" class="w-full p-2 pr-8 border rounded text-xs bg-white">
+                                <button type="button" onclick="togglePasswordVisibility('admin-view-pass', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">👁️</button>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-gray-600 mb-0.5">Mật khẩu Reset & Xóa Dữ Liệu:</label>
-                            <input type="password" id="admin-reset-pass" class="w-full p-2 border rounded text-xs bg-white">
+                            <div class="relative">
+                                <input type="password" id="admin-reset-pass" class="w-full p-2 pr-8 border rounded text-xs bg-white">
+                                <button type="button" onclick="togglePasswordVisibility('admin-reset-pass', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">👁️</button>
+                            </div>
                         </div>
                         <button onclick="saveSystemPasswords()" class="w-full bg-red-600 text-white text-xs font-bold py-2 rounded hover:bg-red-700 shadow transition">
                             🔒 Lưu Mật Khẩu Hệ Thống
@@ -367,7 +376,10 @@
                             <input type="text" id="admin-input-name" placeholder="Tên người dùng (vd: Nguyễn Văn A)" class="p-2 border rounded text-xs bg-white">
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="password" id="admin-input-pass" placeholder="Mật khẩu" class="p-2 border rounded text-xs bg-white">
+                            <div class="relative">
+                                <input type="password" id="admin-input-pass" placeholder="Mật khẩu" class="w-full p-2 pr-8 border rounded text-xs bg-white">
+                                <button type="button" onclick="togglePasswordVisibility('admin-input-pass', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">👁️</button>
+                            </div>
                             <select id="admin-input-role" class="w-full p-2 border rounded text-xs bg-white font-medium">
                                 <option value="STAFF">Nhân viên (Không xem doanh thu, lịch sử)</option>
                                 <option value="OWNER">Chủ xe (Xem tất cả giao diện)</option>
@@ -395,6 +407,18 @@
     </div>
 
     <script>
+        // BẬT / TẮT XEM MẬT KHẨU
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
         const TOTAL_BIKES = 100;
         
         // Cấu hình Mật khẩu có thể tùy chỉnh và lưu vào LocalStorage

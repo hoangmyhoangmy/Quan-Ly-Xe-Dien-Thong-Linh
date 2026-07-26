@@ -47,9 +47,12 @@
                 <span class="sm:hidden">Thông Linh</span>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-xs bg-blue-700 px-2.5 py-1 rounded-full border border-blue-400">👤 <span id="current-user-display" class="font-bold"></span></span>
-                <button onclick="openAdminModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-semibold px-2.5 py-1 rounded-lg shadow transition">⚙️ Admin</button>
-                <button onclick="handleLogout()" class="text-xs bg-red-500 hover:bg-red-600 text-white font-semibold px-2.5 py-1 rounded-lg shadow transition">Thoát</button>
+                <div class="flex flex-col text-right">
+                    <span class="text-xs bg-blue-700 px-2.5 py-0.5 rounded-full border border-blue-400 font-bold">👤 <span id="current-user-display"></span></span>
+                    <span id="current-role-badge" class="text-[10px] text-amber-300 font-semibold mt-0.5"></span>
+                </div>
+                <button id="btn-admin-panel" onclick="openAdminModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-semibold px-2.5 py-1.5 rounded-lg shadow transition">⚙️ Admin</button>
+                <button onclick="handleLogout()" class="text-xs bg-red-500 hover:bg-red-600 text-white font-semibold px-2.5 py-1.5 rounded-lg shadow transition">Thoát</button>
             </div>
         </header>
 
@@ -88,14 +91,6 @@
 
                 <div id="card-details" class="text-sm space-y-2 mb-3 text-gray-700"></div>
 
-                <!-- Tùy chọn làm tròn 1 tiếng khi thời gian từ 31~59 phút -->
-                <div id="option-hour-container" class="hidden mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-amber-800">
-                        <input type="checkbox" id="chk-force-hour" onchange="handleHourOptionChange()" class="w-4 h-4 text-blue-600 rounded">
-                        <span>Tính tròn 1 tiếng (31~59 phút) ➔ 100.000 VNĐ</span>
-                    </label>
-                </div>
-
                 <!-- Nút Bấm Tác Vụ -->
                 <div class="space-y-2">
                     <button id="btn-start" onclick="startRental()" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 shadow hidden">
@@ -121,98 +116,130 @@
                 </div>
             </div>
 
-            <!-- BÁO CÁO 1: Bảng Thống Kê Doanh Thu Theo Ngày -->
-            <div class="bg-white p-4 rounded-xl shadow-md border-t-4 border-green-500 space-y-3">
-                <div class="flex justify-between items-center border-b pb-2">
-                    <h3 class="font-bold text-green-700 text-base">📊 Doanh thu theo ngày</h3>
-                    <div class="flex items-center gap-1.5">
-                        <input type="date" id="daily-date-picker" onchange="renderDailyReport()" class="p-1 border rounded text-xs bg-gray-50">
-                        <button onclick="resetDailyData()" class="text-xs text-red-500 hover:text-red-700 font-semibold px-1.5 py-1 bg-red-50 rounded border border-red-200">🔄 Reset</button>
-                    </div>
-                </div>
+            <!-- CHỈ HIỂN THỊ DÀNH CHO QUYỀN "CHỦ XE" -->
+            <div id="owner-only-sections" class="space-y-6">
 
-                <div id="daily-locked-box" class="p-4 bg-gray-50 rounded-lg text-center space-y-2 border border-dashed border-gray-300">
-                    <p class="text-xs text-gray-500 font-medium">🔒 Báo cáo ngày đang bị khóa</p>
-                    <button onclick="unlockDailyReport()" class="bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-green-700 shadow">
-                        🔓 Mở khóa xem
-                    </button>
-                </div>
-
-                <div id="daily-content-box" class="hidden space-y-3">
-                    <div class="flex justify-end">
-                        <button onclick="lockDailyReport()" class="text-xs text-gray-500 hover:text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded border">
-                            🔒 Ẩn doanh thu
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 text-center">
-                        <div class="bg-green-50 p-3 rounded-lg border border-green-200">
-                            <span class="text-xs text-gray-500 block">TỔNG THU NHẬP</span>
-                            <span id="daily-total-money" class="text-lg font-bold text-green-700">0 VNĐ</span>
-                        </div>
-                        <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                            <span class="text-xs text-gray-500 block">TỔNG LƯỢT THUÊ</span>
-                            <span id="daily-total-count" class="text-lg font-bold text-blue-700">0 lượt</span>
+                <!-- BÁO CÁO 1: Bảng Thống Kê Doanh Thu Theo Ngày -->
+                <div class="bg-white p-4 rounded-xl shadow-md border-t-4 border-green-500 space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-green-700 text-base">📊 Doanh thu theo ngày</h3>
+                        <div class="flex items-center gap-1.5">
+                            <input type="date" id="daily-date-picker" onchange="renderDailyReport()" class="p-1 border rounded text-xs bg-gray-50">
+                            <button onclick="resetDailyData()" class="text-xs text-red-500 hover:text-red-700 font-semibold px-1.5 py-1 bg-red-50 rounded border border-red-200">🔄 Reset</button>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- BÁO CÁO 2: Bảng Tổng Tiền Theo Tháng Của Từng Xe -->
-            <div class="bg-white p-4 rounded-xl shadow-md border-t-4 border-indigo-500 space-y-3">
-                <div class="flex justify-between items-center border-b pb-2">
-                    <h3 class="font-bold text-indigo-700 text-base">📈 Doanh thu tháng theo xe</h3>
-                    <div class="flex items-center gap-1.5">
-                        <input type="month" id="monthly-picker" onchange="renderMonthlyReport()" class="p-1 border rounded text-xs bg-gray-50">
-                        <button onclick="resetMonthlyData()" class="text-xs text-red-500 hover:text-red-700 font-semibold px-1.5 py-1 bg-red-50 rounded border border-red-200">🔄 Reset</button>
-                    </div>
-                </div>
-
-                <div id="monthly-locked-box" class="p-4 bg-gray-50 rounded-lg text-center space-y-2 border border-dashed border-gray-300">
-                    <p class="text-xs text-gray-500 font-medium">🔒 Báo cáo tháng đang bị khóa</p>
-                    <button onclick="unlockMonthlyReport()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-700 shadow">
-                        🔓 Mở khóa xem
-                    </button>
-                </div>
-
-                <div id="monthly-content-box" class="hidden space-y-2">
-                    <div class="flex justify-end">
-                        <button onclick="lockMonthlyReport()" class="text-xs text-gray-500 hover:text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded border">
-                            🔒 Ẩn doanh thu
+                    <div id="daily-locked-box" class="p-4 bg-gray-50 rounded-lg text-center space-y-2 border border-dashed border-gray-300">
+                        <p class="text-xs text-gray-500 font-medium">🔒 Báo cáo ngày đang bị khóa</p>
+                        <button onclick="unlockDailyReport()" class="bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-green-700 shadow">
+                            🔓 Mở khóa xem
                         </button>
                     </div>
-                    <div class="text-xs text-gray-500 flex justify-between bg-indigo-50 p-2 rounded border border-indigo-100">
-                        <span>Tổng doanh thu tháng:</span>
-                        <b id="monthly-grand-total" class="text-indigo-600 font-bold">0 VNĐ</b>
-                    </div>
-                    <div id="monthly-bike-list" class="space-y-1.5 max-h-60 overflow-y-auto text-xs border-t pt-2"></div>
-                </div>
-            </div>
 
-            <!-- Bảng Lịch Sử Cho Thuê -->
-            <div class="bg-white p-4 rounded-xl shadow-md space-y-3">
-                <div class="flex justify-between items-center border-b pb-2">
-                    <button onclick="unlockHistory()" class="font-bold text-gray-800 hover:text-blue-600 flex items-center gap-1.5 text-base">
-                        <span>📋 Lịch sử thuê xe</span>
-                        <span id="history-lock-status-badge" class="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border">(Bấm để xem)</span>
-                    </button>
-                    <div id="history-actions" class="hidden items-center gap-2">
-                        <button onclick="lockHistory()" class="text-xs text-gray-500 hover:text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded border">🔒 Ẩn</button>
-                        <button onclick="clearHistoryWithPassword()" class="text-xs text-red-500 hover:underline font-medium">Xóa hết</button>
-                    </div>
-                </div>
-
-                <div id="history-locked-box" class="p-4 bg-gray-50 rounded-lg text-center space-y-2 border border-dashed border-gray-300">
-                    <p class="text-xs text-gray-500 font-medium">🔒 Lịch sử thuê xe đang bị khóa</p>
-                    <button onclick="unlockHistory()" class="bg-gray-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-gray-800 shadow">
-                        🔓 Mở khóa xem lịch sử
-                    </button>
-                </div>
-
-                <div id="history-content-box" class="hidden">
-                    <div id="history-list" class="space-y-3 text-xs max-h-80 overflow-y-auto">
-                        <p class="text-gray-400 italic text-center py-2">Chưa có lịch sử giao dịch.</p>
+                    <div id="daily-content-box" class="hidden space-y-3">
+                        <div class="flex justify-end">
+                            <button onclick="lockDailyReport()" class="text-xs text-gray-500 hover:text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded border">
+                                🔒 Ẩn doanh thu
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 text-center">
+                            <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+                                <span class="text-xs text-gray-500 block">TỔNG THU NHẬP</span>
+                                <span id="daily-total-money" class="text-lg font-bold text-green-700">0 VNĐ</span>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                <span class="text-xs text-gray-500 block">TỔNG LƯỢT THUÊ</span>
+                                <span id="daily-total-count" class="text-lg font-bold text-blue-700">0 lượt</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <!-- BÁO CÁO 2: Bảng Tổng Tiền Theo Tháng Của Từng Xe -->
+                <div class="bg-white p-4 rounded-xl shadow-md border-t-4 border-indigo-500 space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-indigo-700 text-base">📈 Doanh thu tháng theo xe</h3>
+                        <div class="flex items-center gap-1.5">
+                            <input type="month" id="monthly-picker" onchange="renderMonthlyReport()" class="p-1 border rounded text-xs bg-gray-50">
+                            <button onclick="resetMonthlyData()" class="text-xs text-red-500 hover:text-red-700 font-semibold px-1.5 py-1 bg-red-50 rounded border border-red-200">🔄 Reset</button>
+                        </div>
+                    </div>
+
+                    <div id="monthly-locked-box" class="p-4 bg-gray-50 rounded-lg text-center space-y-2 border border-dashed border-gray-300">
+                        <p class="text-xs text-gray-500 font-medium">🔒 Báo cáo tháng đang bị khóa</p>
+                        <button onclick="unlockMonthlyReport()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-700 shadow">
+                            🔓 Mở khóa xem
+                        </button>
+                    </div>
+
+                    <div id="monthly-content-box" class="hidden space-y-2">
+                        <div class="flex justify-end">
+                            <button onclick="lockMonthlyReport()" class="text-xs text-gray-500 hover:text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded border">
+                                🔒 Ẩn doanh thu
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 flex justify-between bg-indigo-50 p-2 rounded border border-indigo-100">
+                            <span>Tổng doanh thu tháng:</span>
+                            <b id="monthly-grand-total" class="text-indigo-600 font-bold">0 VNĐ</b>
+                        </div>
+                        <div id="monthly-bike-list" class="space-y-1.5 max-h-60 overflow-y-auto text-xs border-t pt-2"></div>
+                    </div>
+                </div>
+
+                <!-- Bảng Lịch Sử Cho Thuê -->
+                <div class="bg-white p-4 rounded-xl shadow-md space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <button onclick="unlockHistory()" class="font-bold text-gray-800 hover:text-blue-600 flex items-center gap-1.5 text-base">
+                            <span>📋 Lịch sử thuê xe</span>
+                            <span id="history-lock-status-badge" class="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border">(Bấm để xem)</span>
+                        </button>
+                        <div id="history-actions" class="hidden items-center gap-2">
+                            <button onclick="lockHistory()" class="text-xs text-gray-500 hover:text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded border">🔒 Ẩn</button>
+                            <button onclick="clearHistoryWithPassword()" class="text-xs text-red-500 hover:underline font-medium">Xóa hết</button>
+                        </div>
+                    </div>
+
+                    <div id="history-locked-box" class="p-4 bg-gray-50 rounded-lg text-center space-y-2 border border-dashed border-gray-300">
+                        <p class="text-xs text-gray-500 font-medium">🔒 Lịch sử thuê xe đang bị khóa</p>
+                        <button onclick="unlockHistory()" class="bg-gray-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-gray-800 shadow">
+                            🔓 Mở khóa xem lịch sử
+                        </button>
+                    </div>
+
+                    <div id="history-content-box" class="hidden">
+                        <div id="history-list" class="space-y-3 text-xs max-h-80 overflow-y-auto">
+                            <p class="text-gray-400 italic text-center py-2">Chưa có lịch sử giao dịch.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng Lịch Sử Đăng Nhập Hệ Thống -->
+                <div class="bg-white p-4 rounded-xl shadow-md space-y-3 border-t-4 border-purple-500">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <button onclick="unlockLoginHistory()" class="font-bold text-purple-800 hover:text-purple-600 flex items-center gap-1.5 text-base">
+                            <span>📜 Lịch sử đăng nhập</span>
+                            <span id="login-history-lock-badge" class="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border">(Bấm để xem)</span>
+                        </button>
+                        <div id="login-history-actions" class="hidden items-center gap-2">
+                            <button onclick="lockLoginHistory()" class="text-xs text-gray-500 hover:text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded border">🔒 Ẩn</button>
+                            <button onclick="clearLoginHistoryWithPassword()" class="text-xs text-red-500 hover:underline font-medium">Xóa hết</button>
+                        </div>
+                    </div>
+
+                    <div id="login-history-locked-box" class="p-4 bg-gray-50 rounded-lg text-center space-y-2 border border-dashed border-gray-300">
+                        <p class="text-xs text-gray-500 font-medium">🔒 Lịch sử đăng nhập đang bị khóa</p>
+                        <button onclick="unlockLoginHistory()" class="bg-purple-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-purple-800 shadow">
+                            🔓 Mở khóa xem lịch sử đăng nhập
+                        </button>
+                    </div>
+
+                    <div id="login-history-content-box" class="hidden">
+                        <div id="login-history-list" class="space-y-2 text-xs max-h-72 overflow-y-auto">
+                            <p class="text-gray-400 italic text-center py-2">Chưa có nhật ký đăng nhập.</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -233,32 +260,82 @@
         </div>
     </div>
 
-    <!-- 4. MODAL GIAO DIỆN ADMIN QUẢN LÝ TÀI KHOẢN -->
+    <!-- 4. MODAL GIAO DIỆN ADMIN QUẢN LÝ TÀI KHOẢN & GIÁ THUÊ -->
     <div id="admin-modal" class="fixed inset-0 bg-black/60 hidden z-[60] flex items-center justify-center p-4">
         <div class="bg-white rounded-xl p-5 w-full max-w-md space-y-4 max-h-[90vh] flex flex-col shadow-2xl">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="font-bold text-lg text-amber-600 flex items-center gap-1.5">
-                    <span>⚙️ Quản Lý Tài Khoản Admin</span>
+                    <span>⚙️ Admin Quản Lý System</span>
                 </h3>
                 <button onclick="closeAdminModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
             </div>
 
-            <!-- Form Thêm / Đổi Mật Khẩu ID -->
-            <div class="bg-amber-50/60 p-3.5 rounded-lg border border-amber-200 space-y-3">
-                <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wide">Tạo mới hoặc Đổi mật khẩu ID</h4>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="admin-input-id" placeholder="Mã ID (vd: 123456)" class="p-2 border rounded text-xs bg-white">
-                    <input type="password" id="admin-input-pass" placeholder="Mật khẩu mới" class="p-2 border rounded text-xs bg-white">
-                </div>
-                <button onclick="saveUserFromAdmin()" class="w-full bg-amber-600 text-white text-xs font-bold py-2 rounded hover:bg-amber-700 shadow">
-                    💾 Lưu / Cập Nhật Tài Khoản
-                </button>
-            </div>
+            <div class="overflow-y-auto space-y-5 pr-1 flex-1">
+                <!-- CẤU HÌNH GIÁ TIỀN CHO TỪNG LOẠI XE -->
+                <div class="bg-blue-50/70 p-3.5 rounded-lg border border-blue-200 space-y-3">
+                    <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wide">⚙️ Cấu Hình Giá Thuê Xe</h4>
+                    <div class="space-y-2 text-xs">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 mb-0.5">Chọn Phân Loại Xe:</label>
+                            <select id="price-category-select" onchange="onCategoryChange()" class="w-full p-2 border rounded bg-white font-medium">
+                                <option value="SMALL">Xe Nhỏ (Mã Xe 0001 -> 0050)</option>
+                                <option value="LARGE">Xe To (Mã Xe 0051 -> 0100)</option>
+                            </select>
+                        </div>
 
-            <!-- Danh Sách Tài Khoản Hiện Có -->
-            <div class="flex-1 overflow-y-auto space-y-2">
-                <h4 class="text-xs font-bold text-slate-700">Danh sách tài khoản (<span id="user-count-badge">0</span>):</h4>
-                <div id="admin-user-list" class="space-y-1.5 text-xs"></div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 mb-0.5">Áp dụng cho Mã Xe:</label>
+                            <select id="price-bike-select" class="w-full p-2 border rounded bg-white font-medium">
+                                <option value="ALL">-- Áp dụng toàn bộ loại xe này --</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-600 mb-0.5">Cách tính tiền:</label>
+                                <select id="price-unit-select" class="w-full p-2 border rounded bg-white font-medium">
+                                    <option value="MINUTE">Tính theo phút (VNĐ/Phút)</option>
+                                    <option value="HOUR">Tính theo giờ (VNĐ/Giờ)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-600 mb-0.5">Giá tiền (VNĐ):</label>
+                                <input type="number" id="price-amount-input" placeholder="Ví dụ: 200 hoặc 50000" class="w-full p-2 border rounded bg-white">
+                            </div>
+                        </div>
+
+                        <button onclick="saveBikePriceConfig()" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 shadow mt-1">
+                            💾 Cập Nhật Giá Thuê
+                        </button>
+                    </div>
+                </div>
+
+                <!-- FORM TẠO / ĐỔI MẬT KHẨU & PHÂN QUYỀN -->
+                <div class="bg-amber-50/60 p-3.5 rounded-lg border border-amber-200 space-y-3">
+                    <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wide">👤 Quản Lý Tài Khoản & Phân Quyền</h4>
+                    <div class="space-y-2">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="admin-input-id" placeholder="Mã ID (vd: nv01)" class="p-2 border rounded text-xs bg-white">
+                            <input type="text" id="admin-input-name" placeholder="Tên người dùng (vd: Nguyễn Văn A)" class="p-2 border rounded text-xs bg-white">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="password" id="admin-input-pass" placeholder="Mật khẩu" class="p-2 border rounded text-xs bg-white">
+                            <select id="admin-input-role" class="w-full p-2 border rounded text-xs bg-white font-medium">
+                                <option value="STAFF">Nhân viên (Không xem doanh thu, lịch sử)</option>
+                                <option value="OWNER">Chủ xe (Xem tất cả giao diện)</option>
+                            </select>
+                        </div>
+                        <button onclick="saveUserFromAdmin()" class="w-full bg-amber-600 text-white text-xs font-bold py-2 rounded hover:bg-amber-700 shadow">
+                            💾 Lưu / Cập Nhật Tài Khoản
+                        </button>
+                    </div>
+                </div>
+
+                <!-- DANH SÁCH TÀI KHOẢN -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-700">Danh sách tài khoản (<span id="user-count-badge">0</span>):</h4>
+                    <div id="admin-user-list" class="space-y-1.5 text-xs max-h-40 overflow-y-auto"></div>
+                </div>
             </div>
 
             <div class="border-t pt-3 flex justify-end">
@@ -275,13 +352,21 @@
         const VIEW_PASSWORD = "123456@@";       // Mật khẩu mở báo cáo nhanh
         const RESET_PASSWORD = "123456@@@";    // Mật khẩu reset doanh thu
 
-        // Quản lý Danh sách Tài khoản ID (Lưu localStorage)
-        let users = JSON.parse(localStorage.getItem('app_users') || '{}');
+        // Quản lý Danh sách Tài khoản ID, Tên & Phân Quyền (Lưu localStorage)
+        // Cấu trúc: { '123456': { name: 'Chủ Xe (Mặc định)', pass: '123456@@', role: 'OWNER' } }
+        let users = JSON.parse(localStorage.getItem('app_users_v3') || '{}');
+        
         // Khởi tạo tài khoản mặc định nếu chưa có
         if (Object.keys(users).length === 0) {
-            users['123456'] = '123456@@';
-            localStorage.setItem('app_users', JSON.stringify(users));
+            users['123456'] = { name: 'Chủ Xe (Mặc định)', pass: '123456@@', role: 'OWNER' };
+            localStorage.setItem('app_users_v3', JSON.stringify(users));
         }
+
+        // Lịch sử Đăng nhập Hệ thống
+        let loginHistory = JSON.parse(localStorage.getItem('app_login_history') || '[]');
+
+        // Cấu hình Bảng giá tiền riêng cho từng xe
+        let bikePrices = JSON.parse(localStorage.getItem('app_bike_prices') || '{}');
 
         let currentUser = localStorage.getItem('logged_in_user') || null;
 
@@ -293,6 +378,7 @@
         let isDailyUnlocked = false;
         let isMonthlyUnlocked = false;
         let isHistoryUnlocked = false;
+        let isLoginHistoryUnlocked = false;
 
         let html5QrCode = null;
         let isCameraActive = false;
@@ -302,12 +388,27 @@
         document.getElementById('daily-date-picker').value = todayStr;
         document.getElementById('monthly-picker').value = thisMonthStr;
 
-        // XỬ LÝ ĐĂNG NHẬP / ĐĂNG XUẤT
+        // XỬ LÝ ĐĂNG NHẬP / ĐĂNG XUẤT & PHÂN QUYỀN GIAO DIỆN
         function checkAuth() {
             if (currentUser && users[currentUser]) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('current-user-display').textContent = currentUser;
+                
+                const userInfo = users[currentUser];
+                const displayName = userInfo.name ? `${userInfo.name} (${currentUser})` : currentUser;
+                document.getElementById('current-user-display').textContent = displayName;
+
+                const role = userInfo.role || 'STAFF';
+                const ownerSections = document.getElementById('owner-only-sections');
+                const roleBadge = document.getElementById('current-role-badge');
+
+                if (role === 'OWNER') {
+                    ownerSections.classList.remove('hidden');
+                    roleBadge.textContent = 'Quyền: Chủ xe';
+                } else {
+                    ownerSections.classList.add('hidden');
+                    roleBadge.textContent = 'Quyền: Nhân viên';
+                }
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
                 document.getElementById('main-app').classList.add('hidden');
@@ -320,9 +421,20 @@
             const passInput = document.getElementById('login-pass').value.trim();
             const errorMsg = document.getElementById('login-error-msg');
 
-            if (users[idInput] && users[idInput] === passInput) {
+            if (users[idInput] && users[idInput].pass === passInput) {
                 currentUser = idInput;
                 localStorage.setItem('logged_in_user', currentUser);
+
+                // Ghi lại Lịch sử Đăng Nhập
+                const now = new Date();
+                const newLog = {
+                    id: idInput,
+                    name: users[idInput].name || 'Chưa đặt tên',
+                    loginTime: now.toISOString()
+                };
+                loginHistory.unshift(newLog);
+                localStorage.setItem('app_login_history', JSON.stringify(loginHistory));
+
                 errorMsg.classList.add('hidden');
                 document.getElementById('login-id').value = '';
                 document.getElementById('login-pass').value = '';
@@ -342,11 +454,12 @@
             }
         }
 
-        // GIAO DIỆN ADMIN QUẢN LÝ TÀI KHOẢN
+        // GIAO DIỆN ADMIN QUẢN LÝ TÀI KHOẢN & GIÁ TIỀN
         function openAdminModal() {
-            let pass = prompt("Nhập mật khẩu Admin để truy cập quản lý:");
+            let pass = prompt("Nhập mật khẩu Admin để truy cập:");
             if (pass === ADMIN_ACCESS_PASS) {
                 renderAdminUserList();
+                onCategoryChange();
                 document.getElementById('admin-modal').classList.remove('hidden');
             } else if (pass !== null) {
                 alert("Mật khẩu Admin không chính xác!");
@@ -356,6 +469,7 @@
         function closeAdminModal() {
             document.getElementById('admin-modal').classList.add('hidden');
             document.getElementById('admin-input-id').value = '';
+            document.getElementById('admin-input-name').value = '';
             document.getElementById('admin-input-pass').value = '';
         }
 
@@ -368,14 +482,18 @@
             let html = '';
             userKeys.forEach(id => {
                 let isDefault = id === '123456';
+                let userName = users[id].name || 'Chưa đặt tên';
+                let roleText = users[id].role === 'OWNER' ? 'Chủ xe' : 'Nhân viên';
+                let roleColor = users[id].role === 'OWNER' ? 'text-amber-600 bg-amber-50' : 'text-blue-600 bg-blue-50';
+                
                 html += `
                     <div class="flex justify-between items-center p-2 bg-slate-50 rounded border">
                         <div>
-                            <b class="text-slate-800">${id}</b>
-                            <span class="text-slate-400 text-[10px] block">Mật khẩu: ••••••••</span>
+                            <b class="text-slate-800">${id}</b> - <span class="font-medium text-slate-700">${userName}</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded font-semibold ${roleColor} ml-1">${roleText}</span>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button onclick="fillAdminEdit('${id}')" class="text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100">Đổi MK</button>
+                            <button onclick="fillAdminEdit('${id}')" class="text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100">Sửa</button>
                             ${!isDefault ? `<button onclick="deleteUserFromAdmin('${id}')" class="text-red-600 bg-red-50 px-2 py-1 rounded hover:bg-red-100">Xóa</button>` : `<span class="text-[10px] text-gray-400 px-1">(Gốc)</span>`}
                         </div>
                     </div>
@@ -386,36 +504,181 @@
 
         function fillAdminEdit(id) {
             document.getElementById('admin-input-id').value = id;
-            document.getElementById('admin-input-pass').focus();
+            document.getElementById('admin-input-name').value = users[id].name || '';
+            document.getElementById('admin-input-pass').value = users[id].pass;
+            document.getElementById('admin-input-role').value = users[id].role || 'STAFF';
+            document.getElementById('admin-input-name').focus();
         }
 
         function saveUserFromAdmin() {
             const id = document.getElementById('admin-input-id').value.trim();
+            const name = document.getElementById('admin-input-name').value.trim();
             const pass = document.getElementById('admin-input-pass').value.trim();
+            const role = document.getElementById('admin-input-role').value;
 
-            if (!id || !pass) {
-                alert("Vui lòng nhập đầy đủ cả ID và Mật khẩu!");
+            if (!id || !pass || !name) {
+                alert("Vui lòng nhập đầy đủ Mã ID, Tên người dùng và Mật khẩu!");
                 return;
             }
 
-            users[id] = pass;
-            localStorage.setItem('app_users', JSON.stringify(users));
+            users[id] = { name: name, pass: pass, role: role };
+            localStorage.setItem('app_users_v3', JSON.stringify(users));
             renderAdminUserList();
+            checkAuth();
             
             document.getElementById('admin-input-id').value = '';
+            document.getElementById('admin-input-name').value = '';
             document.getElementById('admin-input-pass').value = '';
-            alert(`Đã lưu tài khoản ${id} thành công!`);
+            alert(`Đã lưu tài khoản ${name} (${id}) thành công!`);
         }
 
         function deleteUserFromAdmin(id) {
             if (id === '123456') {
-                alert("Không thể xóa tài khoản ID mặc định gốc (123456)!");
+                alert("Không thể xóa tài khoản ID gốc (123456)!");
                 return;
             }
             if (confirm(`Bạn chắc chắn muốn xóa tài khoản ID: ${id}?`)) {
                 delete users[id];
-                localStorage.setItem('app_users', JSON.stringify(users));
+                localStorage.setItem('app_users_v3', JSON.stringify(users));
                 renderAdminUserList();
+            }
+        }
+
+        // QUẢN LÝ HIỂN THỊ LỊCH SỬ ĐĂNG NHẬP
+        function unlockLoginHistory() {
+            if (isLoginHistoryUnlocked) return;
+            let pass = prompt("Nhập mật khẩu xem Lịch sử đăng nhập:");
+            if (pass === VIEW_PASSWORD) {
+                isLoginHistoryUnlocked = true;
+                document.getElementById('login-history-locked-box').classList.add('hidden');
+                document.getElementById('login-history-content-box').classList.remove('hidden');
+                document.getElementById('login-history-actions').classList.remove('hidden');
+                document.getElementById('login-history-actions').classList.add('flex');
+                document.getElementById('login-history-lock-badge').textContent = "(Đang mở)";
+                renderLoginHistory();
+            } else if (pass !== null) {
+                alert("Mật khẩu không chính xác!");
+            }
+        }
+
+        function lockLoginHistory() {
+            isLoginHistoryUnlocked = false;
+            document.getElementById('login-history-locked-box').classList.remove('hidden');
+            document.getElementById('login-history-content-box').classList.add('hidden');
+            document.getElementById('login-history-actions').classList.add('hidden');
+            document.getElementById('login-history-actions').classList.remove('flex');
+            document.getElementById('login-history-lock-badge').textContent = "(Bấm để xem)";
+        }
+
+        function renderLoginHistory() {
+            if (!isLoginHistoryUnlocked) return;
+            const container = document.getElementById('login-history-list');
+
+            if (loginHistory.length === 0) {
+                container.innerHTML = `<p class="text-gray-400 italic text-center py-2">Chưa có nhật ký đăng nhập.</p>`;
+                return;
+            }
+
+            let html = '';
+            loginHistory.forEach((item) => {
+                let timeObj = new Date(item.loginTime);
+                html += `
+                    <div class="p-2.5 bg-purple-50/60 rounded-lg border border-purple-100 flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-purple-900">${item.name}</span>
+                            <span class="text-gray-500 text-[11px] block">ID: <b>${item.id}</b></span>
+                        </div>
+                        <div class="text-right text-[11px] text-purple-700 font-medium">
+                            <span>🕒 ${formatFullDateTime(timeObj)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function clearLoginHistoryWithPassword() {
+            let pass = prompt("Nhập mật khẩu để XÓA TOÀN BỘ lịch sử đăng nhập:");
+            if (pass === VIEW_PASSWORD) {
+                if (confirm("Bạn có chắc chắn muốn xóa sạch nhật ký đăng nhập hệ thống?")) {
+                    loginHistory = [];
+                    localStorage.setItem('app_login_history', JSON.stringify(loginHistory));
+                    renderLoginHistory();
+                    alert("Đã xóa sạch lịch sử đăng nhập!");
+                }
+            } else if (pass !== null) {
+                alert("Mật khẩu không chính xác!");
+            }
+        }
+
+        // CẤU HÌNH BẢNG GIÁ THUÊ XE CỦA ADMIN
+        function onCategoryChange() {
+            const cat = document.getElementById('price-category-select').value;
+            const bikeSelect = document.getElementById('price-bike-select');
+            bikeSelect.innerHTML = '<option value="ALL">-- Áp dụng cho TOÀN BỘ loại xe này --</option>';
+
+            let start = cat === 'SMALL' ? 1 : 51;
+            let end = cat === 'SMALL' ? 50 : 100;
+
+            for (let i = start; i <= end; i++) {
+                let num = String(i).padStart(4, '0');
+                let bikeId = `XE-${num}-THONG-LINH`;
+                let opt = document.createElement('option');
+                opt.value = bikeId;
+                opt.textContent = bikeId;
+                bikeSelect.appendChild(opt);
+            }
+        }
+
+        function saveBikePriceConfig() {
+            const cat = document.getElementById('price-category-select').value;
+            const targetBike = document.getElementById('price-bike-select').value;
+            const unit = document.getElementById('price-unit-select').value;
+            const amount = parseFloat(document.getElementById('price-amount-input').value);
+
+            if (isNaN(amount) || amount <= 0) {
+                alert("Vui lòng nhập số tiền hợp lệ lớn hơn 0!");
+                return;
+            }
+
+            if (targetBike === 'ALL') {
+                let start = cat === 'SMALL' ? 1 : 51;
+                let end = cat === 'SMALL' ? 50 : 100;
+                for (let i = start; i <= end; i++) {
+                    let num = String(i).padStart(4, '0');
+                    let bikeId = `XE-${num}-THONG-LINH`;
+                    bikePrices[bikeId] = { type: unit, rate: amount };
+                }
+                alert(`Đã cập nhật giá mới cho tất cả các xe nhóm ${cat === 'SMALL' ? 'Xe Nhỏ (1-50)' : 'Xe To (51-100)'}!`);
+            } else {
+                bikePrices[targetBike] = { type: unit, rate: amount };
+                alert(`Đã cập nhật giá riêng cho mã xe ${targetBike}!`);
+            }
+
+            localStorage.setItem('app_bike_prices', JSON.stringify(bikePrices));
+            document.getElementById('price-amount-input').value = '';
+            checkBikeStatus();
+        }
+
+        // THUẬT TOÁN TÍNH TIỀN THEO BẢNG GIÁ CẤU HÌNH
+        function calculatePriceForBike(bikeId, durationMinutes) {
+            let config = bikePrices[bikeId] || { type: 'HOUR', rate: 50000 };
+
+            if (config.type === 'MINUTE') {
+                return Math.ceil(durationMinutes * config.rate);
+            } else {
+                let hourRate = config.rate;
+                let hours = durationMinutes / 60;
+                return Math.ceil(hours * hourRate);
+            }
+        }
+
+        function getPriceInfoText(bikeId) {
+            let config = bikePrices[bikeId] || { type: 'HOUR', rate: 50000 };
+            if (config.type === 'MINUTE') {
+                return `${config.rate.toLocaleString('vi-VN')} VNĐ / Phút`;
+            } else {
+                return `${config.rate.toLocaleString('vi-VN')} VNĐ / Giờ`;
             }
         }
 
@@ -428,18 +691,19 @@
             return `${timeStr} - ${dateStr}`;
         }
 
-        // Tạo 100 xe XE-xxxx-THONG-LINH
+        // Khởi tạo danh sách 100 xe
         const selectElem = document.getElementById('select-bike');
         for (let i = 1; i <= TOTAL_BIKES; i++) {
             let num = String(i).padStart(4, '0');
             let bikeId = `XE-${num}-THONG-LINH`;
+            let typeLabel = i <= 50 ? '(Xe Nhỏ)' : '(Xe To)';
             let opt = document.createElement('option');
             opt.value = bikeId;
-            opt.textContent = bikeId;
+            opt.textContent = `${bikeId} ${typeLabel}`;
             selectElem.appendChild(opt);
         }
 
-        // Bật/Tắt Quét Mã QR
+        // Quét mã QR
         function toggleQrScanner() {
             if (isCameraActive) {
                 stopQrScanner();
@@ -483,7 +747,6 @@
             let code = decodedText.trim();
             if (code.startsWith("XE-") && code.endsWith("-THONG-LINH")) {
                 isScanningLock = true;
-                
                 let isConfirm = confirm(`Bạn chọn xe ${code} đúng không?`);
                 if (isConfirm) {
                     selectedBikeId = code;
@@ -491,31 +754,8 @@
                     checkBikeStatus();
                     document.getElementById('action-card').scrollIntoView({ behavior: 'smooth' });
                 }
-
                 setTimeout(() => { isScanningLock = false; }, 2000);
             }
-        }
-
-        function calculatePrice(durationMinutes, isHourForced) {
-            if (durationMinutes <= 30) {
-                return 50000;
-            } else if (durationMinutes >= 31 && durationMinutes <= 59) {
-                return isHourForced ? 100000 : 50000;
-            } else {
-                let blocks = Math.ceil(durationMinutes / 30);
-                return blocks * 50000;
-            }
-        }
-
-        function handleHourOptionChange() {
-            const chk = document.getElementById('chk-force-hour');
-            if (chk.checked) {
-                let isConfirm = confirm("Bạn có đồng ý tính giá 1 tiếng (100.000 VNĐ) cho lượt thuê này không?");
-                if (!isConfirm) {
-                    chk.checked = false;
-                }
-            }
-            checkBikeStatus();
         }
 
         function checkBikeStatus() {
@@ -529,30 +769,23 @@
             const btnStart = document.getElementById('btn-start');
             const btnStop = document.getElementById('btn-stop');
             const btnChange = document.getElementById('btn-change');
-            const hourOptionContainer = document.getElementById('option-hour-container');
-            const chkForceHour = document.getElementById('chk-force-hour');
 
             card.classList.remove('hidden');
             bikeIdElem.textContent = selectedBikeId;
 
+            let priceText = getPriceInfoText(selectedBikeId);
+
             if (rentals[selectedBikeId]) {
                 let startTime = new Date(rentals[selectedBikeId].startTime);
                 let durationMinutes = Math.max(1, Math.ceil((new Date() - startTime) / (1000 * 60)));
-                
-                if (durationMinutes >= 31 && durationMinutes <= 59) {
-                    hourOptionContainer.classList.remove('hidden');
-                } else {
-                    hourOptionContainer.classList.add('hidden');
-                    chkForceHour.checked = false;
-                }
-
-                let estimatedPrice = calculatePrice(durationMinutes, chkForceHour.checked);
+                let estimatedPrice = calculatePriceForBike(selectedBikeId, durationMinutes);
 
                 card.className = "bg-white p-5 rounded-xl shadow-lg border-l-4 border-amber-500";
                 badgeElem.className = "px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700";
                 badgeElem.textContent = "ĐANG THUÊ";
 
                 detailsElem.innerHTML = `
+                    <p>🏷️ <b>Đơn giá áp dụng:</b> ${priceText}</p>
                     <p>🕒 <b>Bắt đầu:</b> ${formatFullDateTime(startTime)}</p>
                     <p>⏱ <b>Đã thuê:</b> ${durationMinutes} phút</p>
                     <p>💰 <b>Tạm tính:</b> <b class="text-red-600 text-base">${estimatedPrice.toLocaleString('vi-VN')} VNĐ</b></p>
@@ -566,10 +799,7 @@
                 badgeElem.className = "px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700";
                 badgeElem.textContent = "ĐANG RẢNH";
 
-                detailsElem.innerHTML = `<p class="text-gray-500">Xe sẵn sàng cho thuê. Giá: <b>100.000 VNĐ/giờ</b> (50.000 VNĐ / 30 phút).</p>`;
-
-                hourOptionContainer.classList.add('hidden');
-                chkForceHour.checked = false;
+                detailsElem.innerHTML = `<p class="text-gray-600">Xe sẵn sàng cho thuê. Giá cài đặt: <b class="text-blue-600">${priceText}</b>.</p>`;
 
                 btnStart.classList.remove('hidden');
                 btnStop.classList.add('hidden');
@@ -593,10 +823,10 @@
             let startTime = new Date(rentals[selectedBikeId].startTime);
             let endTime = new Date();
             let durationMinutes = Math.max(1, Math.ceil((endTime - startTime) / (1000 * 60)));
-            let isHourForced = document.getElementById('chk-force-hour').checked;
-            let totalPrice = calculatePrice(durationMinutes, isHourForced);
+            let totalPrice = calculatePriceForBike(selectedBikeId, durationMinutes);
 
             let confirmMsg = `XÁC NHẬN KẾT THÚC THUÊ XE ${selectedBikeId}:\n\n` +
+                `- Đơn giá: ${getPriceInfoText(selectedBikeId)}\n` +
                 `- Bắt đầu: ${formatFullDateTime(startTime)}\n` +
                 `- Kết thúc: ${formatFullDateTime(endTime)}\n` +
                 `- Tổng thời gian: ${durationMinutes} phút\n` +
@@ -615,7 +845,6 @@
                 delete rentals[selectedBikeId];
                 localStorage.setItem('rentals', JSON.stringify(rentals));
 
-                document.getElementById('chk-force-hour').checked = false;
                 checkBikeStatus();
             }
         }
@@ -896,9 +1125,10 @@
             renderDailyReport();
             renderMonthlyReport();
             renderHistory();
+            renderLoginHistory();
         }
 
-        // Kiểm tra đăng nhập ban đầu
+        // Kiểm tra xác thực ban đầu
         checkAuth();
         updateActiveList();
     </script>
